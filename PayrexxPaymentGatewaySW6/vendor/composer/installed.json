@@ -1,0 +1,45 @@
+[
+    {
+        "name": "payrexx/payrexx",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/payrexx/payrexx-php.git",
+            "reference": "2ad4c0d962a5d186c309c10cf5da6cc6e436fb5b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/2ad4c0d962a5d186c309c10cf5da6cc6e436fb5b",
+            "reference": "2ad4c0d962a5d186c309c10cf5da6cc6e436fb5b",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.4"
+        },
+        "time": "2020-01-13T14:14:55+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-0": {
+                "Payrexx": "lib/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Payrexx AG",
+                "homepage": "https://www.payrexx.com"
+            }
+        ],
+        "description": "Payrexx PHPLib",
+        "homepage": "https://www.payrexx.com",
+        "keywords": [
+            "gateway",
+            "payment"
+        ]
+    }
+]

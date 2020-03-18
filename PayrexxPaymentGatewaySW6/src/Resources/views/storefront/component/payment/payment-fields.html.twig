@@ -1,0 +1,10 @@
+{% sw_extends '@Storefront/storefront/component/payment/payment-fields.html.twig' %}
+
+{% block component_payment_fieldset_template %}
+    {% if payment.translated.customFields.is_payrexx_applepay and payment.translated.customFields.template %}
+        {% include payment.translated.customFields.template %}
+        <div data-payrexx-payment-method-name='{{payment.translated.customFields.payrexx_payment_method_name}}'></div>
+    {% endif %}
+    {{ parent() }}
+
+{% endblock %}
