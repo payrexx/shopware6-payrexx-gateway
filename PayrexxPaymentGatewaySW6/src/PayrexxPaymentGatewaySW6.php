@@ -31,6 +31,7 @@ class PayrexxPaymentGatewaySW6 extends Plugin
     public function install(InstallContext $context): void
     {
         $this->addPaymentMethod($context->getContext());
+        parent::install($context);
     }
 
     /**
@@ -116,7 +117,7 @@ class PayrexxPaymentGatewaySW6 extends Plugin
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class));
         $paymentMethods = $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext());
         if (!empty($paymentMethods->getIds())) {
-            foreach ($paymentMethods->getIds() as $paymentMethodId) {   
+            foreach ($paymentMethods->getIds() as $paymentMethodId) {
                 $paymentMethod = [
                     'id' => $paymentMethodId,
                     'active' => $active,

@@ -5,6 +5,8 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <defaults public="true"/>
+
         <service id="PayrexxPaymentGateway\Handler\PaymentHandler">
             <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
             <argument type="service" id="service_container" />
@@ -18,5 +20,11 @@
             <argument type="service" id="customer.repository" />
             <argument type="service" id="monolog.logger"/>
         </service>
+
+        <service id="PayrexxPaymentGateway\Controller\SettingsController">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="monolog.logger"/>
+        </service>
+
     </services>
 </container>

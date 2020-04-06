@@ -1,0 +1,30 @@
+{
+    "payrexx-payment": {
+        "module": {
+            "title": "Payrexx Payments",
+            "description": "Payrexx Payments"
+        },
+        "settingsForm": {
+            "title": "Payrexx Payments",
+            "test": "Teste den API-Zugang",
+            "save": "Speichern",
+            "messages": {
+                "messageNotBlank": "Dieses Feld darf nicht leer sein.",
+                "titleSuccess": "Erfolg",
+                "titleError": "Fehler",
+                "messageTestSuccess": "Die API-Zugangsdaten sind korrekt.",
+                "messageTestError": "Die API-Zugangsdaten sind falsch.",
+                "messageTestErrorGeneral": "Die API-Zugangsdaten konnten nicht verifiziert werden.",
+                "messageSaveSuccess": "Die Plugin-Einstellungen wurden gespeichert.",
+                "messageSaveError": "Die Plugin-Einstellungen konnten nicht gespeichert werden."
+            }
+        },
+        "supportModal": {
+            "supportButton": "Support",
+            "title": "Wie können wir Ihnen helfen?",
+            "supportDesc": "Kontaktieren Sie unser Support-Team",
+            "manualButton": "Dokumentation",
+            "manualDesc": "Lesen Sie unsere Integrations Anleitung"
+        }
+    }
+}

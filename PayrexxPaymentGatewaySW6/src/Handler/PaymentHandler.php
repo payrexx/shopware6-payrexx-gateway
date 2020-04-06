@@ -25,7 +25,7 @@ use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandle
 class PaymentHandler implements AsynchronousPaymentHandlerInterface
 {
 
-    const PLUGIN_CONFIG_DOMAIN = 'PayrexxPaymentGateway.config.';
+    const PLUGIN_CONFIG_DOMAIN = 'PayrexxPaymentGatewaySW6.settings.';
 
     const PAYMENT_MEAN_PREFIX = 'payrexx_payment_';
     const BASE_URL = 'payrexx.com';

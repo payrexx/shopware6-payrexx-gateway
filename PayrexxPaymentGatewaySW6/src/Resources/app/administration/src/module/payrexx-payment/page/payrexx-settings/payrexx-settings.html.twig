@@ -1,0 +1,121 @@
+{% block payrexx_payment_settings %}
+<sw-page class="payrexx-payment">
+    {% block payrexx_payment_settings_header %}
+    <template slot="smart-bar-header">
+        <h2>
+            {{ $tc('sw-settings.index.title') }}
+            <sw-icon name="small-arrow-medium-right" small></sw-icon>
+            {{ $tc('payrexx-payment.settingsForm.title') }}
+        </h2>
+    </template>
+    {% endblock %}
+    {% block payrexx_payment_actions %}
+    <template slot="smart-bar-actions">
+        {% block payrexx_payment_settings_actions_feedback %}
+        <sw-button
+            @click="isSupportModalOpen = true"
+            :disabled="false"
+            variant="ghost"
+            :square="false"
+            :block="false"
+            :isLoading="false">
+            {{ $tc('payrexx-payment.supportModal.supportButton') }}
+        </sw-button>
+        {% endblock %}
+        {% block payrexx_payment_settings_actions_test %}
+        <sw-button-process @click="onTest"
+                           :isLoading="isTesting"
+                           :processSuccess="isTestSuccessful"
+                           :disabled="credentialsMissing || isLoading">
+            {{ $tc('payrexx-payment.settingsForm.test') }}
+        </sw-button-process>
+        {% endblock %}
+
+
+        {% block payrexx_payment_settings_actions_save %}
+        <sw-button-process
+            class="sw-settings-login-registration__save-action"
+            :isLoading="isLoading"
+            :processSuccess="isSaveSuccessful"
+            :disabled="isLoading || isTesting"
+            variant="primary"
+            @process-finish="saveFinish"
+            @click="onSave">
+            {{ $tc('payrexx-payment.settingsForm.save') }}
+        </sw-button-process>
+        {% endblock %}
+    </template>
+    {% endblock %}
+    {% block payrexx_payment_settings_content %}
+    <template #content>
+        <sw-modal
+            v-if="isSupportModalOpen"
+            @modal-close="isSupportModalOpen = false"
+            :title="$tc('payrexx-payment.supportModal.title')"
+            class="payrexx-support sw-modal--medium">
+            <sw-container columns="1fr 1fr">
+                <div class="payrexx-support__col">
+                    <div class="payrexx-support__icon">
+                        <sw-icon name="default-documentation-file" large="true"></sw-icon>
+                    </div>
+                    <p class="payrexx-support__desc">
+                        {{ $tc('payrexx-payment.supportModal.manualDesc') }}
+                    </p>
+                    <sw-button
+                        :disabled="false"
+                        variant="primary"
+                        :square="false"
+                        :block="false"
+                        :isLoading="false"
+                        link="https://support.payrexx.com/en/support/solutions/articles/11000084187-payrexx-shop-plugin-shopware-6-integration">
+                        {{ $tc('payrexx-payment.supportModal.manualButton') }}
+                    </sw-button>
+                </div>
+                <div class="payrexx-support__col">
+                    <div class="payrexx-support__icon">
+                        <sw-icon name="default-device-headset" large="true"></sw-icon>
+                    </div>
+                    <p class="payrexx-support__desc">
+                        {{ $tc('payrexx-payment.supportModal.supportDesc') }}
+                    </p>
+                    <sw-button
+                        :disabled="false"
+                        variant="primary"
+                        :square="false"
+                        :block="false"
+                        :isLoading="false"
+                        link="mailto:tech.support@payrexx.com">
+                        {{ $tc('payrexx-payment.supportModal.supportButton') }}
+                    </sw-button>
+                </div>
+            </sw-container>
+        </sw-modal>
+
+        <sw-card-view>
+            <sw-system-config
+                ref="systemConfig"
+                salesChannelSwitchable
+                inherit
+                @config-changed="onConfigChange"
+                domain="PayrexxPaymentGatewaySW6.settings">
+                <template #card-element="{ element, config }">
+                    <sw-form-field-renderer
+                        v-if="element.name.startsWith('PayrexxPaymentGatewaySW6.settings.paymentStatus')"
+                        :config="{
+                                        componentName: 'sw-single-select',
+                                        label: getInlineSnippet(element.config.label),
+                                        helpText: getInlineSnippet(element.config.helpText),
+                                        options: stateMachineTransitionActions,
+                                    }"
+                        v-model="config[element.name]"/>
+                    <sw-form-field-renderer
+                        v-else
+                        v-bind="getBind(element, config)"
+                        v-model="config[element.name]"/>
+                </template>
+            </sw-system-config>
+        </sw-card-view>
+    </template>
+    {% endblock %}
+</sw-page>
+{% endblock %}

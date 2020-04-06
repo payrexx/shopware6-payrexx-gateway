@@ -1,16 +1,18 @@
 {
-  "name": "payrexx/shopware-payrexx-gateway",
+  "name": "payrexx/payment",
   "description": "A Shopware plugin to accept payments with Payrexx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "shopware-platform-plugin",
   "license": "MIT",
   "authors": [
     {
-      "name": "Payrexx"
+      "name": "Payrexx AG",
+      "homepage": "https://payrexx.com"
     }
   ],
   "require": {
-    "shopware/core": "~6.1.0"
+    "shopware/core": "^6.1",
+    "shopware/administration":"^6.1"
   },
   "autoload": {
     "psr-4": {
