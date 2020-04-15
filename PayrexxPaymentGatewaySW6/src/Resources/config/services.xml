@@ -26,5 +26,9 @@
             <argument type="service" id="monolog.logger"/>
         </service>
 
+        <service id="PayrexxPaymentGateway\CookieProvider\CookieProvider" decorates="Shopware\Storefront\Framework\Cookie\CookieProviderInterface">
+            <argument type="service" id="PayrexxPaymentGateway\CookieProvider\CookieProvider.inner" />
+        </service>
+
     </services>
 </container>

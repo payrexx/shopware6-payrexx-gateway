@@ -11,6 +11,7 @@
     }
   ],
   "require": {
+    "php": "^7.2",
     "shopware/core": "^6.1",
     "shopware/administration":"^6.1"
   },
