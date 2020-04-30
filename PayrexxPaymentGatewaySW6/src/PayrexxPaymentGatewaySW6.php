@@ -22,8 +22,42 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 class PayrexxPaymentGatewaySW6 extends Plugin
 {
     const PAYMENT_MEAN_PREFIX = 'payrexx_payment_';
-    const PAYMENT_METHODS = ['mastercard', 'visa', 'american_express', 'postfinance_card', 'postfinance_efinance', 'apple_pay', 'wirpay', 'coinbase',
-        'antepay', 'bancontact', 'eps', 'giropay', 'ideal', 'barzahlen', 'twint'];
+    const PAYMENT_METHODS = [
+                'masterpass' => 'Masterpass',
+                'mastercard' => 'Mastercard',
+                'visa' => 'Visa',
+                'apple_pay' => 'Apple Pay',
+                'maestro' => 'Maestro',
+                'jcb' => 'JCB',
+                'american_express' => 'American Express',
+                'wirpay' => 'WIRpay',
+                'paypal' => 'PayPal',
+                'bitcoin' => 'Bitcoin',
+                'sofortueberweisung_de' => 'Sofort Überweisung',
+                'airplus' => 'Airplus',
+                'billpay' => 'Billpay',
+                'bonuscard' => 'Bonus card',
+                'cashu' => 'CashU',
+                'cb' => 'Carte Bleue',
+                'diners_club' => 'Diners Club',
+                'direct_debit' => 'Direct Debit',
+                'discover' => 'Discover',
+                'elv' => 'ELV',
+                'ideal' => 'iDEAL',
+                'invoice' => 'Invoice',
+                'myone' => 'My One',
+                'paysafecard' => 'Paysafe Card',
+                'postfinance_card' => 'PostFinance Card',
+                'postfinance_efinance' => 'PostFinance E-Finance',
+                'swissbilling' => 'SwissBilling',
+                'twint' => 'TWINT',
+                'barzahlen' => 'Barzahlen/Viacash',
+                'bancontact' => 'Bancontact',
+                'giropay' => 'GiroPay',
+                'eps' => 'EPS',
+                'google_pay' => 'Google Pay',
+                'antepay' => 'AntePay'
+            ];
 
     /**
      * @param InstallContext $context
@@ -68,9 +102,10 @@ class PayrexxPaymentGatewaySW6 extends Plugin
      */
     private function addPaymentMethod(Context $context): void
     {
-        $paymentMethodExists = $this->getPaymentMethodId();
-        // Payment method exists already, no need to continue here
-        if ($paymentMethodExists) {
+        $paymentMethodNames = $this->getPaymentMethodNames();
+
+        // All payment Methods exist already, no need to continue here
+        if (count($paymentMethodNames) == count(self::PAYMENT_METHODS)) {
             return;
         }
 
@@ -79,11 +114,14 @@ class PayrexxPaymentGatewaySW6 extends Plugin
 
         $paymentRepository = $this->container->get('payment_method.repository');
 
-        foreach (self::PAYMENT_METHODS as $paymentMethod) {
+        foreach (self::PAYMENT_METHODS as $paymentMethod => $name) {
+            $paymentMethodName = self::PAYMENT_MEAN_PREFIX . $paymentMethod;
+            if (in_array($paymentMethodName, $paymentMethodNames)) continue;
+
             $isApplePay = $paymentMethod == 'apple_pay';
             $options = [
                 'handlerIdentifier' => PaymentHandler::class,
-                'name' => ucwords(str_replace('_', ' ', $paymentMethod)),
+                'name' => $name,
                 'active' => false,
                 'pluginId' => $pluginId,
                 'customFields' => [
@@ -107,10 +145,10 @@ class PayrexxPaymentGatewaySW6 extends Plugin
     {
         $paymentRepository = $this->container->get('payment_method.repository');
 
-        $paymentMethodExists = $this->getPaymentMethodId();
+        $paymentMethodNames = $this->getPaymentMethodNames();
 
         // Payment does not even exist, so nothing to (de-)activate here
-        if (!$paymentMethodExists) {
+        if (count($paymentMethodNames) == 0) {
             return;
         }
 
@@ -130,20 +168,21 @@ class PayrexxPaymentGatewaySW6 extends Plugin
     /**
      * Get the Payment Method Id
      *
-     * @return string
+     * @return array
      */
-    private function getPaymentMethodId(): ?string
+    private function getPaymentMethodNames(): ?array
     {
+        $payrexxPaymentMethodNames = [];
         $paymentRepository = $this->container->get('payment_method.repository');
 
         // Fetch ID for update
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class));
-        $paymentIds = $paymentRepository->searchIds($paymentCriteria, Context::createDefaultContext());
+        $paymentIds = $paymentRepository->search($paymentCriteria, Context::createDefaultContext());
 
-        if ($paymentIds->getTotal() === 0) {
-            return null;
+        foreach ($paymentIds as $x){
+            $payrexxPaymentMethodNames[] = $x->getCustomfields()['payrexx_payment_method_name'];
         }
 
-        return $paymentIds->getIds()[0];
+        return $payrexxPaymentMethodNames;
     }
 }
