@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6ec5fb3f58a87a947d72d5f14979e65e",
+    "content-hash": "4f05fcb606ee4d0cb5def0a90c149f99",
     "packages": [
         {
             "name": "payrexx/payrexx",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/payrexx/payrexx-php.git",
-                "reference": "2ad4c0d962a5d186c309c10cf5da6cc6e436fb5b"
+                "reference": "1a779326b1bbd317dc942ad2db60ec564bd98b68"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/2ad4c0d962a5d186c309c10cf5da6cc6e436fb5b",
-                "reference": "2ad4c0d962a5d186c309c10cf5da6cc6e436fb5b",
+                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/1a779326b1bbd317dc942ad2db60ec564bd98b68",
+                "reference": "1a779326b1bbd317dc942ad2db60ec564bd98b68",
                 "shasum": ""
             },
             "require": {
@@ -45,7 +45,7 @@
                 "gateway",
                 "payment"
             ],
-            "time": "2020-01-13T14:14:55+00:00"
+            "time": "2020-06-04T14:10:16+00:00"
         }
     ],
     "packages-dev": [],

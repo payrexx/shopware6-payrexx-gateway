@@ -205,6 +205,20 @@ class Gateway extends \Payrexx\Models\Base
     protected $subscriptionCancellationInterval = '';
 
     /**
+     * optional
+     *
+     * @var array $buttonText
+     */
+    protected $buttonText;
+
+    /**
+     * optional
+     *
+     * @var array $successMessage
+     */
+    protected $successMessage;
+
+    /**
      * @access  public
      * @return  int
      */

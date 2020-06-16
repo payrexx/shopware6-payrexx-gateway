@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PayrexxPaymentGateway\Handler;
 
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\Request;
 use PayrexxPaymentGateway\Service\CustomerService;
@@ -14,6 +15,7 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
@@ -161,6 +163,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $context = $salesChannelContext->getContext();
         $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
         if ($totalAmount > 0 ? $this->checkPayrexxGatewayStatus($gatewayId) : true) {
+            $this->saveTransactionDetails($gatewayId, $context, $transactionId);
             $this->transactionStateHandler->pay($transaction->getOrderTransaction()->getId(), $context);
             $this->session->remove('payrexxPayment/gatewayId');
             return;
@@ -273,8 +276,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     /**
      * Check the Payrexx Gateway status whether it is paid or not
      *
-     * @param integer $gatewayId The Payrexx Gateway ID
-     * @return bool TRUE if the payment has been confirmed, FALSE if it is not confirmed
+     * @param $gatewayId
+     * @return bool
      */
     public function checkPayrexxGatewayStatus($gatewayId): bool
     {
@@ -286,10 +289,132 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $gateway->setId($gatewayId);
         try {
             $payrexxGateway = $payrexx->getOne($gateway);
-            return $payrexxGateway->getStatus() == 'confirmed';
+            return ($payrexxGateway->getStatus() == 'confirmed');
         } catch (\Payrexx\PayrexxException $e) {
         }
         return false;
+    }
+
+    /**
+     * @param $gatewayId
+     * @return \Payrexx\Models\Request\Gateway|bool
+     */
+    public function getPayrexxGatewayDetails($gatewayId)
+    {
+        if (!$gatewayId) {
+            return false;
+        }
+        $payrexx = $this->getInterface();
+        $gateway = new \Payrexx\Models\Request\Gateway();
+        $gateway->setId($gatewayId);
+        try {
+            $payrexxGateway = $payrexx->getOne($gateway);
+            return $payrexxGateway;
+        } catch (\Payrexx\PayrexxException $e) {
+        }
+        return false;
+    }
+
+    /**
+     * @param $gatewayId
+     * @param $context
+     * @param $transactionId
+     */
+    public function saveTransactionDetails($gatewayId, $context, $transactionId)
+    {
+        $payrexxGateway = $this->getPayrexxGatewayDetails($gatewayId);
+        if($payrexxGateway->getStatus() == 'confirmed' && $payrexxGateway){
+            $invoices = $payrexxGateway->getInvoices();
+
+            if($invoices && $invoices[0]){
+                $invoice = $invoices[0];
+                $transactions = $invoice['transactions'];
+
+                if($transactions && $transactions[0]){
+                    $transaction = $transactions[0];
+                    $transactionRepo = $this->container->get('order_transaction.repository');
+                    $transactionRepo->upsert([[
+                        'id' => $transactionId,
+                        'customFields' => ['transaction_ids' => $transaction['uuid'].'_'.$transaction['id']]
+                    ]], $context);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $transactionId
+     * @param $context
+     * @return bool|null|\Payrexx\Models\Request\Transaction|OrderTransactionEntity|string
+     */
+    public function getPayrexxTransactionDetails($transactionId, $context)
+    {
+        if (!$transactionId) {
+            return false;
+        }
+
+        $transactionRepo = $this->container->get('order_transaction.repository');
+        try {
+            $transactionDetails = $transactionRepo->search(
+                (new Criteria([$transactionId]))->addAssociation('customFields'),
+                $context
+            );
+        } catch (InconsistentCriteriaIdsException $e) {
+            return $e->getMessage();
+        }
+
+
+        /** @var OrderTransactionEntity|null $transaction */
+        $transaction = $transactionDetails->first();
+
+        if (!($transaction instanceof OrderTransactionEntity)) {
+            return "No Transaction Found";
+        }
+
+        $customFields = $transaction->getCustomFields();
+        if($customFields && $customFields['transaction_ids']){
+            $transactionIDs = explode("_",$customFields['transaction_ids']);
+            if(is_array($transactionIDs) && $transactionIDs[1]){
+                $transactionId = $transactionIDs[1];
+            }
+        }
+
+         $payrexx = $this->getInterface();
+         $transaction = new \Payrexx\Models\Request\Transaction();
+         $transaction->setId($transactionId);
+
+         try {
+             $transaction = $payrexx->getOne($transaction);
+             return $transaction;
+         } catch (\Payrexx\PayrexxException $e) {
+             return $e->getMessage();
+         }
+         return "";
+ }
+
+ /**
+  * capture a Transaction
+  *
+  * @param integer $gatewayId The Payrexx Gateway ID
+  * @return string
+  */
+    public function captureTransaction($gatewayId)
+    {
+        if (!$gatewayId) {
+            return false;
+        }
+        $payrexx = $this->getInterface();
+
+        $transaction = new \Payrexx\Models\Request\Transaction();
+        $transaction->setId($gatewayId);
+
+        try {
+            $response = $payrexx->capture($transaction);
+            //var_dump($response);
+            return $response;
+        } catch (\Payrexx\PayrexxException $e) {
+            return $e->getMessage();
+        }
     }
 
 }

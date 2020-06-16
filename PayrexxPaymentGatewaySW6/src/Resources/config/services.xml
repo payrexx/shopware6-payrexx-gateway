@@ -30,5 +30,13 @@
             <argument type="service" id="PayrexxPaymentGateway\CookieProvider\CookieProvider.inner" />
         </service>
 
+        <service id="PayrexxPaymentGateway\Subscriber\BackendSubscriber">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService" />
+            <argument type="service" id="PayrexxPaymentGateway\Handler\PaymentHandler" />
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+
     </services>
 </container>
