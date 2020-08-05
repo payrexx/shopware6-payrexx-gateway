@@ -164,7 +164,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
         if ($totalAmount > 0 ? $this->checkPayrexxGatewayStatus($gatewayId) : true) {
             $this->saveTransactionDetails($gatewayId, $context, $transactionId);
-            $this->transactionStateHandler->pay($transaction->getOrderTransaction()->getId(), $context);
+            $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
             $this->session->remove('payrexxPayment/gatewayId');
             return;
         }
