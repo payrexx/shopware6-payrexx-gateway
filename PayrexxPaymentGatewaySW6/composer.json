@@ -26,6 +26,18 @@
     "label": {
       "en-GB": "Payrexx Payment Gateway",
       "de-DE": "Payrexx Payment Gateway"
+    },
+    "description": {
+      "de-DE": "Payrexx ermöglicht Ihnen eine sichere und einfache Zahlungsabwicklung. Sie benötigen weder eine eigene Website noch Programmierkenntnisse, um über 100+ Zahlungsmittel zu akzeptieren.",
+      "en-GB": "Payrexx enables you to process payments securely and easily. You do not need your own website or programming skills to accept over 100+ payment methods."
+    },
+    "manufacturerLink": {
+      "de-DE": "https://payrexx.com/de/",
+      "en-GB": "https://payrexx.com/en/"
+    },
+    "supportLink": {
+      "de-DE": "https://support.payrexx.com/de/",
+      "en-GB": "https://support.payrexx.com/en/"
     }
   }
 }
