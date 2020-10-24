@@ -9,7 +9,6 @@ use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Exception\InconsistentCriteriaIdsException;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Core\Checkout\Order\OrderDefinition;
 use Shopware\Core\Checkout\Order\OrderEvents;
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
@@ -19,14 +18,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class BackendSubscriber implements EventSubscriberInterface
 {
     private $container;
-    private $config;
     private $paymentHandler;
 
-    public function __construct(ContainerInterface $container,
-                                SystemConfigService $config, PaymentHandler $paymentHandler)
+    public function __construct(ContainerInterface $container, PaymentHandler $paymentHandler)
     {
         $this->container = $container;
-        $this->config = $config;
         $this->paymentHandler = $paymentHandler;
     }
 
@@ -79,6 +75,7 @@ class BackendSubscriber implements EventSubscriberInterface
                     if (!($order instanceof OrderEntity)) {
                         continue;
                     }
+                    $salesChannelId = $order->getSalesChannelId();
 
                     $transaction = $order->getTransactions()->first();
 
@@ -90,10 +87,10 @@ class BackendSubscriber implements EventSubscriberInterface
 
                         if($deliveryState->getTechnicalName() == 'shipped' && $paymentCustomFileds && strpos($paymentCustomFileds['payrexx_payment_method_name'], "payrexx") !== false){
 
-                            $transactionDetail =  $this->paymentHandler->getPayrexxTransactionDetails($transactionId, $context);
+                            $transactionDetail =  $this->paymentHandler->getPayrexxTransactionDetails($transactionId, $context, $salesChannelId);
 
                             if ($transactionDetail->getStatus() == 'uncaptured') {
-                                $status = $this->paymentHandler->captureTransaction($transactionDetail->getId());
+                                $status = $this->paymentHandler->captureTransaction($transactionDetail->getId(), $salesChannelId);
                                 //var_dump($status)
                             }
                         }
