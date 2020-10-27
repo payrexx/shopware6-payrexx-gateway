@@ -225,6 +225,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $gateway->setPsp([]);
         $gateway->setPm([$paymentMean]);
         $gateway->setReferenceId($orderNumber);
+        $gateway->setValidity(15);
 
         $gateway->addField('forename', $customer['forename']);
         $gateway->addField('surname', $customer['surname']);
