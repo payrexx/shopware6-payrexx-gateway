@@ -221,6 +221,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $gateway->setSuccessRedirectUrl($urls['successUrl']);
         $gateway->setFailedRedirectUrl($urls['errorUrl']);
         $gateway->setCancelRedirectUrl($urls['errorUrl']);
+        $gateway->setSkipResultPage(true);
 
         $gateway->setPsp([]);
         $gateway->setPm([$paymentMean]);
