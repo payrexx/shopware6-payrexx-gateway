@@ -11,7 +11,6 @@ use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStat
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\Request;
 use PayrexxPaymentGateway\Service\CustomerService;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -58,11 +57,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     protected $logger;
 
     /**
-     * @var Session
-     */
-    protected $session;
-
-    /**
      * @param OrderTransactionStateHandler $transactionStateHandler
      * @param ContainerInterface $container
      * @param CustomerService $customerService
@@ -81,11 +75,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $this->customerService = $customerService;
         $this->configService = $configService;
         $this->logger = $logger;
-
-        $this->session = new Session();
-        if (!isset($_SESSION)) {
-            $this->session->start();
-        }
     }
 
     /**
@@ -101,17 +90,17 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     {
         $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
         $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
+        $transactionId = $transaction->getOrderTransaction()->getId();
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
-            $this->session->set('payrexxPayment/gatewayId', time());
             $redirectUrl = $transaction->getReturnUrl();
         } else {
             try {
                 $customer = $this->customerService->getCustomerDetails($transaction->getOrder()->getOrderCustomer()->getCustomerId(), Context::createDefaultContext());
             } catch (\Exception $e) {
                 throw new AsyncPaymentProcessException(
-                    $transaction->getOrderTransaction()->getId(),
+                    $transactionId,
                     'An error occurred during the processing the customer details' . PHP_EOL . $e->getMessage()
                 );
             }
@@ -121,8 +110,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $customFields = $transaction->getOrderTransaction()->getPaymentMethod()->getCustomFields();
                 $paymentMean = str_replace(self::PAYMENT_MEAN_PREFIX, '', $customFields['payrexx_payment_method_name']);
 
+
                 $payrexxGateway = $this->createPayrexxGateway(
-                    $transaction->getOrderTransaction()->getId(),
+                    $transactionId,
                     $totalAmount,
                     $salesChannelContext->getCurrency()->getIsoCode(),
                     $paymentMean,
@@ -134,11 +124,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                     $salesChannelId
                 );
 
-                $this->session->set('payrexxPayment/gatewayId', $payrexxGateway->getId());
+                $this->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
                 $redirectUrl = $this->getProviderUrl($salesChannelId) . '?payment=' . $payrexxGateway->getHash();
             } catch (\Exception $e) {
                 throw new AsyncPaymentProcessException(
-                    $transaction->getOrderTransaction()->getId(),
+                    $transactionId,
                     'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
                 );
             }
@@ -154,29 +144,63 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      */
     public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
-        $gatewayId = $this->session->get('payrexxPayment/gatewayId');
+        $context = $salesChannelContext->getContext();
+
+        $customFields = $transaction->getOrderTransaction()->getCustomFields();
+        $gatewayId = $customFields['gateway_id'];
         $transactionId = $transaction->getOrderTransaction()->getId();
-        $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
+        $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
+
+        if ($totalAmount <= 0) {
+            if (OrderTransactionStates::STATE_PAID === $transaction->getOrderTransaction()->getStateMachineState()->getTechnicalName()) return;
+            $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
+            return;
+        }
+
         if (empty($gatewayId)) {
             throw new CustomerCanceledAsyncPaymentException(
                 $transactionId,
                 'Customer canceled the payment on the Payrexx page'
             );
         }
-        $context = $salesChannelContext->getContext();
-        $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
-        if ($totalAmount > 0 ? $this->checkPayrexxGatewayStatus($gatewayId, $salesChannelId) : true) {
-            $this->saveTransactionDetails($gatewayId, $salesChannelContext, $transactionId);
 
-            if (OrderTransactionStates::STATE_PAID === $transaction->getOrderTransaction()->getStateMachineState()->getTechnicalName()) return;
-            $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
-            $this->session->remove('payrexxPayment/gatewayId');
+
+        $payrexxGateway = $this->getPayrexxGatewayDetails($gatewayId, $salesChannelContext->getSalesChannel()->getId());
+        $payrexxGatewayStatus = $payrexxGateway->getStatus();
+        if ($totalAmount <= 0) {
+            $payrexxGatewayStatus = 'confirmed';
+        }
+
+        $transactionDetails = $this->getTransactionDetails($payrexxGateway);
+        switch ($payrexxGatewayStatus) {
+            case 'confirmed':
+                if (OrderTransactionStates::STATE_PAID === $transaction->getOrderTransaction()->getStateMachineState()->getTechnicalName()) break;
+                $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
+                break;
+            case 'waiting':
+                if (!$transactionDetails || !in_array($transactionDetails['status'], ['confirmed', 'waiting'])) {
+                    throw new CustomerCanceledAsyncPaymentException(
+                        $transactionId,
+                        'Customer canceled the payment on the Payrexx page'
+                    );
+                    break;
+                }
+
+                if (OrderTransactionStates::STATE_IN_PROGRESS === $transaction->getOrderTransaction()->getStateMachineState()->getTechnicalName()) break;
+                $this->transactionStateHandler->process($transaction->getOrderTransaction()->getId(), $context);
+                break;
+            default:
+                throw new CustomerCanceledAsyncPaymentException(
+                    $transactionId,
+                    'Customer canceled the payment on the Payrexx page'
+                );
+                break;
+        }
+
+        if (!$transactionDetails) {
             return;
         }
-        throw new CustomerCanceledAsyncPaymentException(
-            $transactionId,
-            'Customer canceled the payment on the Payrexx page'
-        );
+        $this->saveTransactionCustomFields($salesChannelContext, $transactionId, $transactionDetails);
     }
 
     /**
@@ -292,30 +316,34 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     }
 
     /**
-     * @param $gatewayId
+     * @param $payrexxGateway
      * @param $salesChannelContext
      * @param $transactionId
      */
-    public function saveTransactionDetails($gatewayId, $salesChannelContext, $transactionId)
+    private function saveTransactionCustomFields($salesChannelContext, $transactionId, $details)
     {
-        $payrexxGateway = $this->getPayrexxGatewayDetails($gatewayId, $salesChannelContext->getSalesChannel()->getId());
-        if($payrexxGateway->getStatus() == 'confirmed' && $payrexxGateway){
+        $transactionRepo = $this->container->get('order_transaction.repository');
+        $transactionRepo->upsert([[
+            'id' => $transactionId,
+            'customFields' => $details
+        ]], $salesChannelContext->getContext());
+    }
+
+    private function getTransactionDetails($payrexxGateway) {
+        if (in_array($payrexxGateway->getStatus(), ['confirmed', 'waiting'])) {
             $invoices = $payrexxGateway->getInvoices();
 
-            if($invoices && $invoices[0]){
+            if ($invoices && $invoices[0]) {
                 $invoice = $invoices[0];
                 $transactions = $invoice['transactions'];
 
-                if($transactions && $transactions[0]){
+                if ($transactions && $transactions[0]) {
                     $transaction = $transactions[0];
-                    $transactionRepo = $this->container->get('order_transaction.repository');
-                    $transactionRepo->upsert([[
-                        'id' => $transactionId,
-                        'customFields' => ['transaction_ids' => $transaction['uuid'].'_'.$transaction['id']]
-                    ]], $salesChannelContext->getContext());
+                    return $transaction;
                 }
             }
         }
+        return false;
     }
 
     /**

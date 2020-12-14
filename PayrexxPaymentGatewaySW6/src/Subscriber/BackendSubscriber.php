@@ -85,7 +85,7 @@ class BackendSubscriber implements EventSubscriberInterface
                         $paymentMethod = $transaction->getPaymentMethod();
                         $paymentCustomFileds = $paymentMethod->getCustomFields();
 
-                        if($deliveryState->getTechnicalName() == 'shipped' && $paymentCustomFileds && strpos($paymentCustomFileds['payrexx_payment_method_name'], "payrexx") !== false){
+                        if ($deliveryState->getTechnicalName() == 'shipped' && $paymentCustomFileds && strpos($paymentCustomFileds['payrexx_payment_method_name'], "payrexx") !== false){
 
                             $transactionDetail =  $this->paymentHandler->getPayrexxTransactionDetails($transactionId, $context, $salesChannelId);
 
