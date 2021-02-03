@@ -207,14 +207,24 @@ class Gateway extends \Payrexx\Models\Base
     /**
      * optional
      *
-     * @var array $buttonText
+     * @access  protected
+     * @var     array $buttonText
      */
     protected $buttonText;
 
     /**
      * optional
      *
-     * @var array $successMessage
+     * @access  protected
+     * @var     string $lookAndFeelProfile
+     */
+    protected $lookAndFeelProfile;
+
+    /**
+     * optional
+     *
+     * @access  protected
+     * @var     array $successMessage
      */
     protected $successMessage;
 
@@ -701,6 +711,58 @@ class Gateway extends \Payrexx\Models\Base
     public function setSubscriptionCancellationInterval($subscriptionCancellationInterval)
     {
         $this->subscriptionCancellationInterval = $subscriptionCancellationInterval;
+    }
+
+    /**
+     * @return array
+     */
+    public function getButtonText()
+    {
+        return $this->buttonText;
+    }
+
+    /**
+     * Use language ID as array key. Use key 0 as default purpose. Will be used for each activated frontend language.
+     *
+     * @param array $buttonText
+     */
+    public function setButtonText($buttonText)
+    {
+        $this->buttonText = $buttonText;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLookAndFeelProfile()
+    {
+        return $this->lookAndFeelProfile;
+    }
+
+    /**
+     * @param string $lookAndFeelProfile
+     */
+    public function setLookAndFeelProfile($lookAndFeelProfile)
+    {
+        $this->lookAndFeelProfile = $lookAndFeelProfile;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSuccessMessage()
+    {
+        return $this->successMessage;
+    }
+
+    /**
+     * Use language ID as array key. Use key 0 as default purpose. Will be used for each activated frontend language.
+     *
+     * @param array $successMessage
+     */
+    public function setSuccessMessage($successMessage)
+    {
+        $this->successMessage = $successMessage;
     }
 
 }

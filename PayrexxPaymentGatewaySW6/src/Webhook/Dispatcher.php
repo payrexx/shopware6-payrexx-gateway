@@ -11,7 +11,9 @@ declare(strict_types=1);
 
 namespace PayrexxPaymentGateway\Webhook;
 
+use PayrexxPaymentGateway\Handler\TransactionHandler;
 use PayrexxPaymentGateway\Service\ConfigService;
+use PayrexxPaymentGateway\Service\PayrexxApiService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates;
 use Shopware\Core\Framework\Context;
@@ -28,9 +30,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class Dispatcher
 {
-    const PAYREXX_TRANSACTION_STATUS_CONFIRMED = 'confirmed';
-    const PAYREXX_TRANSACTION_STATUS_REFUNDED = 'refunded';
-    const PAYREXX_TRANSACTION_STATUS_PARTIALLY_REFUNDED = 'partially-refunded';
 
     /**
      * @var OrderTransactionStateHandler
@@ -48,6 +47,16 @@ class Dispatcher
     protected $configService;
 
     /**
+     * @var PayrexxApiService
+     */
+    protected $payrexxApiService;
+
+    /**
+     * @var TransactionHandler
+     */
+    protected $transactionHandler;
+
+    /**
      * @var LoggerInterface
      */
     protected $logger;
@@ -56,18 +65,24 @@ class Dispatcher
      * @param OrderTransactionStateHandler $transactionStateHandler
      * @param ContainerInterface $container
      * @param ConfigService $configService
+     * @param PayrexxApiService $payrexxApiService
+     * @param TransactionHandler $transactionHandler
      * @param type $logger
      */
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
         ContainerInterface $container,
         ConfigService $configService,
+        PayrexxApiService $payrexxApiService,
+        TransactionHandler $transactionHandler,
         $logger
     )
     {
         $this->transactionStateHandler = $transactionStateHandler;
         $this->container = $container;
         $this->configService = $configService;
+        $this->payrexxApiService = $payrexxApiService;
+        $this->transactionHandler = $transactionHandler;
         $this->logger = $logger;
     }
 
@@ -88,11 +103,12 @@ class Dispatcher
     {
         $content = json_decode($request->getContent());
 
-        $payrexxTransaction = $content->transaction;
-        $swTransactionId = $payrexxTransaction->referenceId;
+        $requestTransaction = $content->transaction;
+        $swTransactionId = $requestTransaction->referenceId;
+        $requestGatewayId = $requestTransaction->invoice->paymentRequestId;
 
         // check required data
-        if (!$swTransactionId || !$payrexxTransaction->status || !$payrexxTransaction->id) {
+        if (!$swTransactionId || !$requestTransaction->status || !$requestTransaction->id) {
             return new Response('Data incomplete', Response::HTTP_BAD_REQUEST);
         }
 
@@ -104,8 +120,6 @@ class Dispatcher
             );
             $transaction = $transactionDetails->first();
 
-            $transactionState = $transaction->getStateMachineState()->getTechnicalName();
-
             $orderRepo = $this->container->get('order.repository');
             $orderDetails = $orderRepo->search(
                 (new Criteria([$transaction->getOrderId()]))->addAssociation('customFields'),
@@ -116,44 +130,17 @@ class Dispatcher
             return new Response('Data incorrect', Response::HTTP_BAD_REQUEST);
         }
 
-
-        $payrexxStatus = $this->checkPayrexxStatus($payrexxTransaction->id, $order->getSalesChannelId());
-        if ($payrexxStatus !== $payrexxTransaction->status) {
-            return new Response('Wrong Status', Response::HTTP_BAD_REQUEST);
+        if ($transaction->getCustomFields()['gateway_id'] != $requestGatewayId) {
+            return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
         }
 
-        switch ($payrexxTransaction->status) {
-            case self::PAYREXX_TRANSACTION_STATUS_CONFIRMED:
-                if (OrderTransactionStates::STATE_PAID === $transactionState) break;
-                $this->transactionStateHandler->paid($swTransactionId, $context);
-                break;
-            case self::PAYREXX_TRANSACTION_STATUS_REFUNDED:
-                if (OrderTransactionStates::STATE_REFUNDED === $transactionState) break;
-                $this->transactionStateHandler->refund($swTransactionId, $context);
-                break;
-            case self::PAYREXX_TRANSACTION_STATUS_PARTIALLY_REFUNDED:
-                if (OrderTransactionStates::STATE_PARTIALLY_REFUNDED === $transactionState) break;
-                $this->transactionStateHandler->refundPartially($swTransactionId, $context);
-                break;
+        $payrexxTransaction = $this->payrexxApiService->getPayrexxTransaction($requestTransaction->id, $order->getSalesChannelId());
+        if ($payrexxTransaction->getStatus() !== $requestTransaction->status) {
+            return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
         }
+
+        $this->transactionHandler->handleTransactionStatus($transaction, $requestTransaction->status, $context);
 
         return new Response('', Response::HTTP_OK);
-    }
-
-    private function checkPayrexxStatus(int $payrexxTransactionId, $salesChannelId): ?string
-    {
-
-        $config = $this->configService->getPluginConfiguration($salesChannelId);
-        $payrexx = new \Payrexx\Payrexx($config['instanceName'], $config['apiKey']);
-
-        $payrexxTransaction = new \Payrexx\Models\Request\Transaction();
-        $payrexxTransaction->setId($payrexxTransactionId);
-
-        try {
-            $response = $payrexx->getOne($payrexxTransaction);
-            return $response->getStatus();
-        } catch(\Payrexx\PayrexxException $e) {
-            return null;
-        }
     }
 }

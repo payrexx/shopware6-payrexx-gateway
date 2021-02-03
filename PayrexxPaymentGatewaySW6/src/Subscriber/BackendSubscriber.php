@@ -2,7 +2,7 @@
 
 namespace PayrexxPaymentGateway\Subscriber;
 
-use PayrexxPaymentGateway\Handler\PaymentHandler;
+use PayrexxPaymentGateway\Service\PayrexxApiService;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
 use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryEntity;
 use Shopware\Core\Checkout\Order\OrderEntity;
@@ -18,12 +18,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class BackendSubscriber implements EventSubscriberInterface
 {
     private $container;
-    private $paymentHandler;
 
-    public function __construct(ContainerInterface $container, PaymentHandler $paymentHandler)
+    /**
+     * @var PayrexxApiService
+     */
+    protected $payrexxApiService;
+
+    public function __construct(ContainerInterface $container,  PayrexxApiService $payrexxApiService)
     {
         $this->container = $container;
-        $this->paymentHandler = $paymentHandler;
+        $this->payrexxApiService = $payrexxApiService;
     }
 
     public static function getSubscribedEvents(): array
@@ -58,44 +62,40 @@ class BackendSubscriber implements EventSubscriberInterface
 
             $deliveryState = $deliveryInfo->getStateMachineState();
 
-            if($deliveryState){
-                $orderID = $deliveryInfo->getOrder()->getId();
+            if(!$deliveryState || $deliveryState->getTechnicalName() !== 'shipped') {
+                continue;
+            }
 
-                if($orderID){
-                    /** @var EntityRepositoryInterface $orderRepo */
-                    $orderRepo = $this->container->get('order.repository');
-                    /** @var EntitySearchResult $orderR */
-                    $orderResult = $orderRepo->search(
-                        (new Criteria([$orderID]))->addAssociation('transactions.paymentMethod', 'transactions.customFields'),
-                        $context
-                    );
+            /** @var EntityRepositoryInterface $orderRepo */
+            $orderRepo = $this->container->get('order.repository');
+            /** @var EntitySearchResult $orderR */
+            $orderResult = $orderRepo->search(
+                (new Criteria([$deliveryInfo->getOrderId()]))->addAssociation('transactions.paymentMethod', 'transactions.customFields'),
+                $context
+            );
 
-                    /** @var OrderEntity|null $order */
-                    $order = $orderResult->first();
-                    if (!($order instanceof OrderEntity)) {
-                        continue;
-                    }
-                    $salesChannelId = $order->getSalesChannelId();
+            /** @var OrderEntity|null $order */
+            $order = $orderResult->first();
+            if (!($order instanceof OrderEntity)) {
+                continue;
+            }
+            $salesChannelId = $order->getSalesChannelId();
 
-                    $transaction = $order->getTransactions()->first();
+            $transaction = $order->getTransactions()->first();
 
-                    if($transaction && $transaction->getId()){
+            if (!$transaction || !$transactionCustomFields = $transaction->getCustomFields()) {
+                continue;
+            }
 
-                        $transactionId = $transaction->getId();
-                        $paymentMethod = $transaction->getPaymentMethod();
-                        $paymentCustomFileds = $paymentMethod->getCustomFields();
+            if (!$payrexxGateway = $this->payrexxApiService->getPayrexxGateway($transactionCustomFields['gateway_id'])) {
+                continue;
+            }
+            if (!$payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId)) {
+                continue;
+            }
 
-                        if ($deliveryState->getTechnicalName() == 'shipped' && $paymentCustomFileds && strpos($paymentCustomFileds['payrexx_payment_method_name'], "payrexx") !== false){
-
-                            $transactionDetail =  $this->paymentHandler->getPayrexxTransactionDetails($transactionId, $context, $salesChannelId);
-
-                            if ($transactionDetail->getStatus() == 'uncaptured') {
-                                $status = $this->paymentHandler->captureTransaction($transactionDetail->getId(), $salesChannelId);
-                                //var_dump($status)
-                            }
-                        }
-                    }
-                }
+            if ($payrexxTransaction->getStatus() == 'uncaptured') {
+                $this->payrexxApiService->captureTransaction($payrexxTransaction->getId(), $salesChannelId);
             }
         }
     }

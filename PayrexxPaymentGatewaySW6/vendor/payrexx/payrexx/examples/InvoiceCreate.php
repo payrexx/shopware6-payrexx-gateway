@@ -10,11 +10,11 @@ spl_autoload_register(function($class) {
 
 // $instanceName is a part of the url where you access your payrexx installation.
 // https://{$instanceName}.payrexx.com
-$instanceName = 'YOUR_INSTANCE_NAME';
+$instanceName = 'demo';
 
 // $secret is the payrexx secret for the communication between the applications
 // if you think someone got your secret, just regenerate it in the payrexx administration
-$secret = 'YOUR_SECRET';
+$secret = 'XExDsWOkI0Fim1l1MCpwK73EYTmcMB';
 
 $payrexx = new \Payrexx\Payrexx($instanceName, $secret);
 
@@ -30,7 +30,8 @@ $invoice->setDescription('Thanks for using Payrexx to pay your order');
 
 // administrative information, which provider to use (psp)
 // psp #1 = Payrexx' test mode, see http://developers.payrexx.com/docs/miscellaneous
-$invoice->setPsp(1);
+//$invoice->setPsp([]);
+//$invoice->setPm(['mastercard']);
 
 // internal data only displayed to administrator
 $invoice->setName('Online-Shop payment #001');
@@ -40,6 +41,9 @@ $invoice->setPurpose('Shop Order #001');
 $amount = 5.90;
 // don't forget to multiply by 100
 $invoice->setAmount($amount * 100);
+
+// custom button text
+//$invoice->setButtonText('Pay me');
 
 // VAT rate percentage (nullable)
 $vatRate = 7.70;
@@ -52,6 +56,9 @@ $invoice->setSku($sku);
 // ISO code of currency, list of alternatives can be found here
 // http://developers.payrexx.com/docs/miscellaneous
 $invoice->setCurrency('CHF');
+
+// Expiration date in format: Y-m-d
+$invoice->setExpirationDate('2021-01-28');
 
 // whether charge payment manually at a later date (type authorization)
 $invoice->setPreAuthorization(false);
