@@ -83,11 +83,12 @@ class BackendSubscriber implements EventSubscriberInterface
 
             $transaction = $order->getTransactions()->first();
 
-            if (!$transaction || !$transactionCustomFields = $transaction->getCustomFields()) {
+            $transactionCustomFields = $transaction->getCustomFields();
+            if (!$transaction || !$transactionCustomFields || !$transactionCustomFields['gateway_id']) {
                 continue;
             }
 
-            if (!$payrexxGateway = $this->payrexxApiService->getPayrexxGateway($transactionCustomFields['gateway_id'])) {
+            if (!$payrexxGateway = $this->payrexxApiService->getPayrexxGateway($transactionCustomFields['gateway_id'], $salesChannelId)) {
                 continue;
             }
             if (!$payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId)) {

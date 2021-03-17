@@ -138,7 +138,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                     $salesChannelContext->getCurrency()->getIsoCode(),
                     $paymentMean,
                     $customer,
-                    $dataBag->get('finishUrl') ?: $transaction->getReturnUrl(),
+                    $transaction->getReturnUrl(),
                     $salesChannelId
                 );
 
@@ -197,11 +197,19 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $payrexxTransactionStatus = Transaction::CONFIRMED;
         }
 
-        $this->transactionHandler->handleTransactionStatus($transaction->getOrderTransaction(), $payrexxTransactionStatus, $context);
-
         if (!$transaction) {
             return;
         }
+        $this->transactionHandler->handleTransactionStatus($transaction->getOrderTransaction(), $payrexxTransactionStatus, $context);
+
         $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $gatewayId]);
+
+        if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::EXPIRED, Transaction::ERROR])){
+            return;
+        }
+        throw new CustomerCanceledAsyncPaymentException(
+            $transactionId,
+            'Customer canceled the payment on the Payrexx page'
+        );
     }
 }

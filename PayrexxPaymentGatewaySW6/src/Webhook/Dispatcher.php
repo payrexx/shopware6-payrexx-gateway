@@ -130,10 +130,12 @@ class Dispatcher
             return new Response('Data incorrect', Response::HTTP_BAD_REQUEST);
         }
 
+        // Validate request by gateway ID
         if ($transaction->getCustomFields()['gateway_id'] != $requestGatewayId) {
             return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
         }
 
+        // Validate request by status
         $payrexxTransaction = $this->payrexxApiService->getPayrexxTransaction($requestTransaction->id, $order->getSalesChannelId());
         if ($payrexxTransaction->getStatus() !== $requestTransaction->status) {
             return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
