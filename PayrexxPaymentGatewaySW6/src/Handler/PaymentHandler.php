@@ -30,7 +30,7 @@ use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandle
 class PaymentHandler implements AsynchronousPaymentHandlerInterface
 {
 
-    const PAYMENT_MEAN_PREFIX = 'payrexx_payment_';
+    const PAYMENT_METHOD_PREFIX = 'payrexx_payment_';
     const BASE_URL = 'payrexx.com';
 
     /**
@@ -114,43 +114,45 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('paymentMethodId', $transaction->getOrderTransaction()->getPaymentMethodId()));
         $paymentMethod = $paymentTranslationRepository->search($paymentCriteria, $salesChannelContext->getContext())->first();
         $customFields = $paymentMethod->getCustomFields();
-        $paymentMean = str_replace(self::PAYMENT_MEAN_PREFIX, '', $customFields['payrexx_payment_method_name']);
+        $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $customFields['payrexx_payment_method_name']);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
             $redirectUrl = $transaction->getReturnUrl();
-        } else {
-            try {
-                $customer = $this->customerService->getCustomerDetails($transaction->getOrder()->getOrderCustomer()->getCustomerId(), Context::createDefaultContext());
-            } catch (\Exception $e) {
-                throw new AsyncPaymentProcessException(
-                    $transactionId,
-                    'An error occurred during the processing the customer details' . PHP_EOL . $e->getMessage()
-                );
-            }
-
-            // Create Payrexx Gateway link for checkout and redirect user
-            try {
-
-                $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
-                    $transactionId,
-                    $totalAmount,
-                    $salesChannelContext->getCurrency()->getIsoCode(),
-                    $paymentMean,
-                    $customer,
-                    $transaction->getReturnUrl(),
-                    $salesChannelId
-                );
-
-                $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
-                $redirectUrl = $payrexxGateway->getLink();
-            } catch (\Exception $e) {
-                throw new AsyncPaymentProcessException(
-                    $transactionId,
-                    'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
-                );
-            }
+            return new RedirectResponse($redirectUrl);
         }
+
+        try {
+            $customer = $this->customerService->getCustomerDetails($transaction->getOrder()->getOrderCustomer()->getCustomerId(), Context::createDefaultContext());
+        } catch (\Exception $e) {
+            throw new AsyncPaymentProcessException(
+                $transactionId,
+                'An error occurred during processing the customer details' . PHP_EOL . $e->getMessage()
+            );
+        }
+
+        // Create Payrexx Gateway link for checkout and redirect user
+        try {
+
+            $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
+                $transactionId,
+                $totalAmount,
+                $salesChannelContext->getCurrency()->getIsoCode(),
+                $paymentMean,
+                $customer,
+                $transaction->getReturnUrl(),
+                $salesChannelId
+            );
+
+            $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
+            $redirectUrl = $payrexxGateway->getLink();
+        } catch (\Exception $e) {
+            throw new AsyncPaymentProcessException(
+                $transactionId,
+                'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
+            );
+        }
+
         return new RedirectResponse($redirectUrl);
     }
 

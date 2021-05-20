@@ -1,5 +1,5 @@
+import './components/payrexx-payment-settings-icon';
 import './extension/sw-settings-index';
-
 import './page/payrexx-settings';
 
 import deDE from './snippet/de_DE.json';
@@ -30,5 +30,11 @@ Module.register('payrexx-payment', {
                 parentPath: 'sw.settings.index'
             }
         }
+    },
+    settingsItem: {
+        group: 'plugins',
+        to: 'payrexx.payment.index',
+        iconComponent: 'payrexx-payment-settings-icon',
+        backgroundEnabled: true,
     }
 });
