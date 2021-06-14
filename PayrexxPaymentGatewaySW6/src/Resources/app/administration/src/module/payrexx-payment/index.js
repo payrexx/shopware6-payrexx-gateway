@@ -3,6 +3,7 @@ import './extension/sw-settings-index';
 import './page/payrexx-settings';
 
 import deDE from './snippet/de_DE.json';
+import deCH from './snippet/de_CH.json';
 import enGB from './snippet/en_GB.json';
 
 
@@ -19,6 +20,7 @@ Module.register('payrexx-payment', {
 
     snippets: {
         'de-DE': deDE,
+        'de-CH': deCH,
         'en-GB': enGB
     },
 

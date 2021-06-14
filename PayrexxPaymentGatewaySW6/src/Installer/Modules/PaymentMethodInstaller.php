@@ -63,6 +63,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Masterpass',
                 ],
+                'de-CH' => [
+                    'name' => 'Masterpass',
+                ],
                 'en-GB' => [
                     'name' => 'Masterpass',
                 ],
@@ -71,6 +74,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_MASTERCARD => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Mastercard',
+                ],
+                'de-CH' => [
                     'name' => 'Mastercard',
                 ],
                 'en-GB' => [
@@ -83,6 +89,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Visa',
                 ],
+                'de-CH' => [
+                    'name' => 'Visa',
+                ],
                 'en-GB' => [
                     'name' => 'Visa',
                 ],
@@ -91,6 +100,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_APPLE_PAY => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Apple Pay',
+                ],
+                'de-CH' => [
                     'name' => 'Apple Pay',
                 ],
                 'en-GB' => [
@@ -103,6 +115,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Maestro',
                 ],
+                'de-CH' => [
+                    'name' => 'Maestro',
+                ],
                 'en-GB' => [
                     'name' => 'Maestro',
                 ],
@@ -111,6 +126,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_JCB => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'JCB',
+                ],
+                'de-CH' => [
                     'name' => 'JCB',
                 ],
                 'en-GB' => [
@@ -123,6 +141,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'American Express',
                 ],
+                'de-CH' => [
+                    'name' => 'American Express',
+                ],
                 'en-GB' => [
                     'name' => 'American Express',
                 ],
@@ -131,6 +152,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_WIR => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'WIRpay',
+                ],
+                'de-CH' => [
                     'name' => 'WIRpay',
                 ],
                 'en-GB' => [
@@ -143,6 +167,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'PayPal',
                 ],
+                'de-CH' => [
+                    'name' => 'PayPal',
+                ],
                 'en-GB' => [
                     'name' => 'PayPal',
                 ],
@@ -151,6 +178,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_BITCOIN => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Bitcoin',
+                ],
+                'de-CH' => [
                     'name' => 'Bitcoin',
                 ],
                 'en-GB' => [
@@ -163,6 +193,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Sofortüberweisung',
                 ],
+                'de-CH' => [
+                    'name' => 'Sofortüberweisung',
+                ],
                 'en-GB' => [
                     'name' => 'Sofortüberweisung',
                 ],
@@ -171,6 +204,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_AIRPLUS => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Airplus',
+                ],
+                'de-CH' => [
                     'name' => 'Airplus',
                 ],
                 'en-GB' => [
@@ -183,6 +219,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Billpay',
                 ],
+                'de-CH' => [
+                    'name' => 'Billpay',
+                ],
                 'en-GB' => [
                     'name' => 'Billpay',
                 ],
@@ -191,16 +230,22 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_BONUSCARD => [
             'translations' => [
                 'de-DE' => [
-                    'name' => 'onus card',
+                    'name' => 'Bonus card',
+                ],
+                'de-CH' => [
+                    'name' => 'Bonus card',
                 ],
                 'en-GB' => [
-                    'name' => 'onus card',
+                    'name' => 'Bonus card',
                 ],
             ],
         ],
         self::PAYREXX_CASHU => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'CashU',
+                ],
+                'de-CH' => [
                     'name' => 'CashU',
                 ],
                 'en-GB' => [
@@ -213,6 +258,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Carte Bleue',
                 ],
+                'de-CH' => [
+                    'name' => 'Carte Bleue',
+                ],
                 'en-GB' => [
                     'name' => 'Carte Bleue',
                 ],
@@ -221,6 +269,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_DINERS => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Diners Club',
+                ],
+                'de-CH' => [
                     'name' => 'Diners Club',
                 ],
                 'en-GB' => [
@@ -233,6 +284,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Direct Debit',
                 ],
+                'de-CH' => [
+                    'name' => 'Direct Debit',
+                ],
                 'en-GB' => [
                     'name' => 'Direct Debit',
                 ],
@@ -241,6 +295,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_DISCOVER => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Discover',
+                ],
+                'de-CH' => [
                     'name' => 'Discover',
                 ],
                 'en-GB' => [
@@ -253,6 +310,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'ELV',
                 ],
+                'de-CH' => [
+                    'name' => 'ELV',
+                ],
                 'en-GB' => [
                     'name' => 'ELV',
                 ],
@@ -261,6 +321,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_IDEAL => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'iDEAL',
+                ],
+                'de-CH' => [
                     'name' => 'iDEAL',
                 ],
                 'en-GB' => [
@@ -273,6 +336,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Invoice',
                 ],
+                'de-CH' => [
+                    'name' => 'Invoice',
+                ],
                 'en-GB' => [
                     'name' => 'Invoice',
                 ],
@@ -283,6 +349,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'My One',
                 ],
+                'de-CH' => [
+                    'name' => 'My One',
+                ],
                 'en-GB' => [
                     'name' => 'My One',
                 ],
@@ -291,16 +360,22 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_PAYSAFECARD => [
             'translations' => [
                 'de-DE' => [
-                    'name' => 'aysafe Card',
+                    'name' => 'Paysafe Card',
+                ],
+                'de-CH' => [
+                    'name' => 'Paysafe Card',
                 ],
                 'en-GB' => [
-                    'name' => 'aysafe Card',
+                    'name' => 'Paysafe Card',
                 ],
             ],
         ],
         self::PAYREXX_PF_CARD => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'PostFinance Card',
+                ],
+                'de-CH' => [
                     'name' => 'PostFinance Card',
                 ],
                 'en-GB' => [
@@ -313,6 +388,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'PostFinance E-Finance',
                 ],
+                'de-CH' => [
+                    'name' => 'PostFinance E-Finance',
+                ],
                 'en-GB' => [
                     'name' => 'PostFinance E-Finance',
                 ],
@@ -321,6 +399,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_SWISSBILLING => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'SwissBilling',
+                ],
+                'de-CH' => [
                     'name' => 'SwissBilling',
                 ],
                 'en-GB' => [
@@ -333,6 +414,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Twint',
                 ],
+                'de-CH' => [
+                    'name' => 'Twint',
+                ],
                 'en-GB' => [
                     'name' => 'Twint',
                 ],
@@ -341,6 +425,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_VIACASH => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Barzahlen',
+                ],
+                'de-CH' => [
                     'name' => 'Barzahlen',
                 ],
                 'en-GB' => [
@@ -353,6 +440,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Bancontact',
                 ],
+                'de-CH' => [
+                    'name' => 'Bancontact',
+                ],
                 'en-GB' => [
                     'name' => 'Bancontact',
                 ],
@@ -361,6 +451,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_GIROPAY => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'GiroPay',
+                ],
+                'de-CH' => [
                     'name' => 'GiroPay',
                 ],
                 'en-GB' => [
@@ -373,6 +466,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'EPS',
                 ],
+                'de-CH' => [
+                    'name' => 'EPS',
+                ],
                 'en-GB' => [
                     'name' => 'EPS',
                 ],
@@ -381,6 +477,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_GOOGLE_PAY => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Google Pay',
+                ],
+                'de-CH' => [
                     'name' => 'Google Pay',
                 ],
                 'en-GB' => [
@@ -393,6 +492,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Klarna Sofortüberweisung',
                 ],
+                'de-CH' => [
+                    'name' => 'Klarna Sofortüberweisung',
+                ],
                 'en-GB' => [
                     'name' => 'Klarna Pay Now',
                 ],
@@ -403,6 +505,9 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Klarna Rechnung',
                 ],
+                'de-CH' => [
+                    'name' => 'Klarna Rechnung',
+                ],
                 'en-GB' => [
                     'name' => 'Klarna Pay Later',
                 ],
@@ -411,6 +516,9 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_ONEY => [
             'translations' => [
                 'de-DE' => [
+                    'name' => 'Oney',
+                ],
+                'de-CH' => [
                     'name' => 'Oney',
                 ],
                 'en-GB' => [
