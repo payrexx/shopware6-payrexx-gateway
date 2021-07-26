@@ -83,7 +83,7 @@ Component.register('payrexx-settings', {
             }).catch((errorResponse) => {
                 this.createNotificationError({
                     title: this.$tc('payrexx-payment.settingsForm.messages.titleError'),
-                    message: this.$tc('payrexx-payment.settingsForm.messages.messageTestError.general')
+                    message: this.$tc('payrexx-payment.settingsForm.messages.messageTestErrorGeneral')
                 });
                 this.isTesting = false;
             });

@@ -596,11 +596,15 @@ class PaymentMethodInstaller implements InstallerInterface
             ->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class))
             ->addFilter(new EqualsFilter('customFields.payrexx_payment_method_name', PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier))
             ->setLimit(1);
-        $paymentMethod = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
-        $paymentMethodId = null;
+        $paymentMethods = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
 
-        if ($paymentMethod->count()){
-            $paymentMethodId = $paymentMethod->getEntities()->first()->getId();
+        $paymentMethodId = null;
+        $paymentMethodActive = false;
+
+        if ($paymentMethods->count()){
+            $paymentMethod = $paymentMethods->getEntities()->first();
+            $paymentMethodId = $paymentMethod->getId();
+            $paymentMethodActive = $paymentMethod->getActive();
         }
 
         $isApplePay = $payrexxPaymentMethodIdentifier == self::PAYREXX_APPLE_PAY;
@@ -608,7 +612,7 @@ class PaymentMethodInstaller implements InstallerInterface
             'id' => $paymentMethodId,
             'handlerIdentifier' => PaymentHandler::class,
             'translations' => $payrexxPaymentMethod['translations'],
-            'active' => false,
+            'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
             'customFields' => [
                 'payrexx_payment_method_name' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,

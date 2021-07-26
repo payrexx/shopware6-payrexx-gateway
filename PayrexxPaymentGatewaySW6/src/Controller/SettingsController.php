@@ -43,7 +43,7 @@ class SettingsController extends AbstractController
     }
 
     /**
-     * @Route("/api/v{version}/_action/payrexx_payment/validate-api-credentials", name="api.action.payrexx_payment.validate.api.credentials", methods={"POST"})
+     * @Route("/api/_action/payrexx_payment/validate-api-credentials", name="api.action.payrexx_payment.validate.api.credentials", methods={"POST"})
      * @throws \Payrexx\PayrexxException
      */
     public function validateApiCredentials(Request $request, Context $context): JsonResponse

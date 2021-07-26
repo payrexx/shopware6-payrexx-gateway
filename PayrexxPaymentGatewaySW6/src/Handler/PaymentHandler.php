@@ -110,11 +110,20 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
         $transactionId = $transaction->getOrderTransaction()->getId();
 
-        $paymentTranslationRepository = $this->container->get('payment_method_translation.repository');
-        $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('paymentMethodId', $transaction->getOrderTransaction()->getPaymentMethodId()));
-        $paymentMethod = $paymentTranslationRepository->search($paymentCriteria, $salesChannelContext->getContext())->first();
+        $paymentMethodRepository = $this->container->get('payment_method.repository');
+        $paymentCriteria = (new Criteria())->addFilter(
+            new EqualsFilter('id', $transaction->getOrderTransaction()->getPaymentMethodId())
+        );
+        $paymentMethod = $paymentMethodRepository->search($paymentCriteria, $salesChannelContext->getContext())->first();
         $customFields = $paymentMethod->getCustomFields();
-        $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $customFields['payrexx_payment_method_name']);
+
+        $paymentMethodName = '';
+
+        if ($customFields) {
+            $paymentMethodName = $customFields['payrexx_payment_method_name'] ?: $paymentMethodName;
+        }
+
+        $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
