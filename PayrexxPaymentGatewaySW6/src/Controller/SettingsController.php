@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PayrexxPaymentGateway\Controller;
 
+use PayrexxPaymentGateway\Handler\PaymentHandler;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -51,7 +52,9 @@ class SettingsController extends AbstractController
         require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';
         $config = $request->get('credentials', []);
 
-        $payrexx = new \Payrexx\Payrexx($config['instanceName'], $config['apiKey']);
+        $platform = !empty($config['platform']) ? $config['platform'] : PaymentHandler::BASE_URL;
+
+        $payrexx = new \Payrexx\Payrexx($config['instanceName'], $config['apiKey'], '', $platform);
 
         $signatureCheck = new \Payrexx\Models\Request\SignatureCheck();
 

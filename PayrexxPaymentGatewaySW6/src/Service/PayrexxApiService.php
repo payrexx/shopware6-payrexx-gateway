@@ -2,6 +2,7 @@
 
 namespace PayrexxPaymentGateway\Service;
 
+use PayrexxPaymentGateway\Handler\PaymentHandler;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
@@ -12,12 +13,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 class PayrexxApiService
 {
     /**
-     * @var EntityRepository 
+     * @var EntityRepository
      */
     protected $customerRepository;
 
     /**
-     * @var LoggerInterface 
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -45,7 +46,8 @@ class PayrexxApiService
     private function getInterface($salesChannelId): \Payrexx\Payrexx
     {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
-        return new \Payrexx\Payrexx($config['instanceName'], $config['apiKey']);
+        $platform = !empty($config['platform']) ? $config['platform'] : PaymentHandler::BASE_URL;
+        return new \Payrexx\Payrexx($config['instanceName'], $config['apiKey'], '', $platform);
     }
 
     /**
@@ -163,9 +165,7 @@ class PayrexxApiService
 
     public function getPayrexxTransaction(int $payrexxTransactionId, $salesChannelId): ?\Payrexx\Models\Response\Transaction
     {
-
-        $config = $this->configService->getPluginConfiguration($salesChannelId);
-        $payrexx = new \Payrexx\Payrexx($config['instanceName'], $config['apiKey']);
+        $payrexx = $this->getInterface($salesChannelId);
 
         $payrexxTransaction = new \Payrexx\Models\Request\Transaction();
         $payrexxTransaction->setId($payrexxTransactionId);

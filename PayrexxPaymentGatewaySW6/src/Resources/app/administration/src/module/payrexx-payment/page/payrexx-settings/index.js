@@ -60,6 +60,7 @@ Component.register('payrexx-settings', {
             let credentials = {
                 instanceName: this.getConfigValue('instanceName'),
                 apiKey: this.getConfigValue('apiKey'),
+                platform: this.getConfigValue('platform'),
             };
 
 

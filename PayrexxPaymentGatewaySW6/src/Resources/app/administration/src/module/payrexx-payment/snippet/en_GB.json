@@ -14,7 +14,7 @@
               "titleError": "Error",
               "messageTestSuccess": "The API credentials are correct.",
               "messageTestError": "The API credentials are wrong.",
-              "messageTestErrorGeneral": "Die API-Zugangsdaten could not be verified.",
+              "messageTestErrorGeneral": "The API-Credentials could not be verified.",
               "messageSaveSuccess": "The plugin settings have been saved.",
               "messageSaveError": "The plugin settings could not be saved."
           }

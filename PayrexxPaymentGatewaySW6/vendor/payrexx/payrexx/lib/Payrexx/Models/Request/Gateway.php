@@ -207,24 +207,14 @@ class Gateway extends \Payrexx\Models\Base
     /**
      * optional
      *
-     * @access  protected
-     * @var     array $buttonText
+     * @var array $buttonText
      */
     protected $buttonText;
 
     /**
      * optional
      *
-     * @access  protected
-     * @var     string $lookAndFeelProfile
-     */
-    protected $lookAndFeelProfile;
-
-    /**
-     * optional
-     *
-     * @access  protected
-     * @var     array $successMessage
+     * @var array $successMessage
      */
     protected $successMessage;
 
@@ -729,22 +719,6 @@ class Gateway extends \Payrexx\Models\Base
     public function setButtonText($buttonText)
     {
         $this->buttonText = $buttonText;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLookAndFeelProfile()
-    {
-        return $this->lookAndFeelProfile;
-    }
-
-    /**
-     * @param string $lookAndFeelProfile
-     */
-    public function setLookAndFeelProfile($lookAndFeelProfile)
-    {
-        $this->lookAndFeelProfile = $lookAndFeelProfile;
     }
 
     /**

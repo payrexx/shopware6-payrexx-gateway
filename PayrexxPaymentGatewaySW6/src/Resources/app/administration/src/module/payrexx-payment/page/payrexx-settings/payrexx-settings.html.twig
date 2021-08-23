@@ -67,7 +67,7 @@
                         :square="false"
                         :block="false"
                         :isLoading="false"
-                        link="https://support.payrexx.com/en/support/solutions/articles/11000084187">
+                        link="https://help.payrexx.com/integration/e-commerce/shopware-6">
                         {{ $tc('payrexx-payment.supportModal.manualButton') }}
                     </sw-button>
                 </div>
@@ -84,7 +84,7 @@
                         :square="false"
                         :block="false"
                         :isLoading="false"
-                        link="mailto:tech.support@payrexx.com">
+                        link="mailto:support+shopware@payrexx.com">
                         {{ $tc('payrexx-payment.supportModal.supportButton') }}
                     </sw-button>
                 </div>
@@ -100,15 +100,6 @@
                 domain="PayrexxPaymentGatewaySW6.settings">
                 <template #card-element="{ element, config }">
                     <sw-form-field-renderer
-                        v-if="element.name.startsWith('PayrexxPaymentGatewaySW6.settings.paymentStatus')"
-                        :config="{
-                                        componentName: 'sw-single-select',
-                                        label: getInlineSnippet(element.config.label),
-                                        helpText: getInlineSnippet(element.config.helpText),
-                                        options: stateMachineTransitionActions,
-                                    }"
-                        v-model="config[element.name]"/>
-                    <sw-form-field-renderer
                         v-else
                         v-bind="getBind(element, config)"
                         v-model="config[element.name]"/>
@@ -119,3 +110,4 @@
     {% endblock %}
 </sw-page>
 {% endblock %}
+
