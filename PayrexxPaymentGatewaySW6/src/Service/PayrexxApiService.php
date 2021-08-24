@@ -46,7 +46,7 @@ class PayrexxApiService
     private function getInterface($salesChannelId): \Payrexx\Payrexx
     {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
-        $platform = !empty($config['platform']) ? $config['platform'] : PaymentHandler::BASE_URL;
+        $platform = !empty($config['platform']) ? $config['platform'] : '';
         return new \Payrexx\Payrexx($config['instanceName'], $config['apiKey'], '', $platform);
     }
 

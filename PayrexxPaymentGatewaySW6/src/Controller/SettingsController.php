@@ -52,8 +52,7 @@ class SettingsController extends AbstractController
         require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';
         $config = $request->get('credentials', []);
 
-        $platform = !empty($config['platform']) ? $config['platform'] : PaymentHandler::BASE_URL;
-
+        $platform = !empty($config['platform']) ? $config['platform'] : '';
         $payrexx = new \Payrexx\Payrexx($config['instanceName'], $config['apiKey'], '', $platform);
 
         $signatureCheck = new \Payrexx\Models\Request\SignatureCheck();
