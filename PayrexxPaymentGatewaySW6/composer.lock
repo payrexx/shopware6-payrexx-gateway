@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f05fcb606ee4d0cb5def0a90c149f99",
+    "content-hash": "b42e55153c3f3b127aa6eac705cd0f45",
     "packages": [
         {
             "name": "payrexx/payrexx",
-            "version": "1.7.3",
+            "version": "v1.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/payrexx/payrexx-php.git",
-                "reference": "1a779326b1bbd317dc942ad2db60ec564bd98b68"
+                "reference": "0cfdafe40e893b12df48d21cd83a5cf3c21b3055"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/1a779326b1bbd317dc942ad2db60ec564bd98b68",
-                "reference": "1a779326b1bbd317dc942ad2db60ec564bd98b68",
+                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/0cfdafe40e893b12df48d21cd83a5cf3c21b3055",
+                "reference": "0cfdafe40e893b12df48d21cd83a5cf3c21b3055",
                 "shasum": ""
             },
             "require": {
@@ -45,17 +45,20 @@
                 "gateway",
                 "payment"
             ],
-            "time": "2020-06-04T14:10:16+00:00"
+            "support": {
+                "issues": "https://github.com/payrexx/payrexx-php/issues",
+                "source": "https://github.com/payrexx/payrexx-php/tree/v1.7.4"
+            },
+            "time": "2021-03-11T15:59:11+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "payrexx/payrexx": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.1.0"
 }

@@ -207,16 +207,34 @@ class Gateway extends \Payrexx\Models\Base
     /**
      * optional
      *
-     * @var array $buttonText
+     * @access  protected
+     * @var     array $buttonText
      */
     protected $buttonText;
 
     /**
      * optional
      *
-     * @var array $successMessage
+     * @access  protected
+     * @var     string $lookAndFeelProfile
+     */
+    protected $lookAndFeelProfile;
+
+    /**
+     * optional
+     *
+     * @access  protected
+     * @var     array $successMessage
      */
     protected $successMessage;
+
+    /**
+     * optional
+     *
+     * @access  protected
+     * @var     array       $basket
+     */
+    protected $basket;
 
     /**
      * @access  public
@@ -722,6 +740,22 @@ class Gateway extends \Payrexx\Models\Base
     }
 
     /**
+     * @return string
+     */
+    public function getLookAndFeelProfile()
+    {
+        return $this->lookAndFeelProfile;
+    }
+
+    /**
+     * @param string $lookAndFeelProfile
+     */
+    public function setLookAndFeelProfile($lookAndFeelProfile)
+    {
+        $this->lookAndFeelProfile = $lookAndFeelProfile;
+    }
+
+    /**
      * @return array
      */
     public function getSuccessMessage()
@@ -737,6 +771,28 @@ class Gateway extends \Payrexx\Models\Base
     public function setSuccessMessage($successMessage)
     {
         $this->successMessage = $successMessage;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBasket(): array
+    {
+        return $this->basket;
+    }
+
+    /**
+     * It is a multidimensional array to parse each product as an array
+     *
+     * @param array $basket         Available product values:
+     *                              name => Can be an array with the key as language ID
+     *                              description => Can be an array with the key as language ID
+     *                              quantity => quantity of the product
+     *                              amount => Product amount
+     */
+    public function setBasket(array $basket): void
+    {
+        $this->basket = $basket;
     }
 
 }

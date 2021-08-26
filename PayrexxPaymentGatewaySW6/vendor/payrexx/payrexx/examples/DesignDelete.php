@@ -1,6 +1,10 @@
 <?php
 
-spl_autoload_register(function($class) {
+use Payrexx\Models\Request\Design;
+use Payrexx\Payrexx;
+use Payrexx\PayrexxException;
+
+spl_autoload_register(function ($class) {
     $root = dirname(__DIR__);
     $classFile = $root . '/lib/' . str_replace('\\', '/', $class) . '.php';
     if (file_exists($classFile)) {
@@ -16,17 +20,14 @@ $instanceName = 'YOUR_INSTANCE_NAME';
 // if you think someone got your secret, just regenerate it in the payrexx administration
 $secret = 'YOUR_SECRET';
 
-$payrexx = new \Payrexx\Payrexx($instanceName, $secret);
+$payrexx = new Payrexx($instanceName, $secret);
 
-$transaction = new \Payrexx\Models\Request\Transaction();
-$transaction->setFilterDatetimeUtcGreaterThan(new \DateTime('2019-12-01 00:00:00'));
-$transaction->setFilterDatetimeUtcLessThan(new \DateTime('2020-10-01 00:00:00'));
-$transaction->setOffset(40);
-$transaction->setLimit(20);
+$design = new Design();
+$design->setUuid('YOUR_UUID');
 
 try {
-    $response = $payrexx->getAll($transaction);
+    $response = $payrexx->delete($design);
     var_dump($response);
-} catch (\Payrexx\PayrexxException $e) {
+} catch (PayrexxException $e) {
     print $e->getMessage();
 }

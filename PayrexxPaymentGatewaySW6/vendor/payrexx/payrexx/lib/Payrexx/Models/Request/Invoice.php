@@ -24,9 +24,19 @@ class Invoice extends \Payrexx\Models\Base
     protected $description = '';
     protected $psp = 0;
 
+
+    /**
+     * optional
+     *
+     * @access  protected
+     * @var     array
+     */
+    protected $pm;
+
     // optional
     protected $name = '';
     protected $purpose = '';
+    protected $buttonText = '';
     protected $amount = 0;
     protected $vatRate = null;
     protected $sku = '';
@@ -44,6 +54,9 @@ class Invoice extends \Payrexx\Models\Base
     protected $subscriptionCancellationInterval = '';
     protected $fields = array();
     protected $concardisOrderId = '';
+
+    /** @var string $expirationDate */
+    protected $expirationDate;
 
     /**
      * @return string
@@ -122,6 +135,26 @@ class Invoice extends \Payrexx\Models\Base
     }
 
     /**
+     * @access  public
+     * @return  array
+     */
+    public function getPm()
+    {
+        return $this->pm;
+    }
+
+    /**
+     * Set payment mean to use.
+     *
+     * @access  public
+     * @param   array   $pm
+     */
+    public function setPm($pm)
+    {
+        $this->pm = $pm;
+    }
+
+    /**
      * @return string
      */
     public function getName()
@@ -157,6 +190,22 @@ class Invoice extends \Payrexx\Models\Base
     public function setPurpose($purpose)
     {
         $this->purpose = $purpose;
+    }
+
+    /**
+     * @return string
+     */
+    public function getButtonText()
+    {
+        return $this->buttonText;
+    }
+
+    /**
+     * @param string $buttonText
+     */
+    public function setButtonText($buttonText)
+    {
+        $this->buttonText = $buttonText;
     }
 
     /**
@@ -458,6 +507,24 @@ class Invoice extends \Payrexx\Models\Base
     public function setConcardisOrderId($concardisOrderId)
     {
         $this->concardisOrderId = $concardisOrderId;
+    }
+
+    /**
+     * Format: Y-m-d
+     * @return string
+     */
+    public function getExpirationDate()
+    {
+        return $this->expirationDate;
+    }
+
+    /**
+     * Format: Y-m-d
+     * @param string $expirationDate
+     */
+    public function setExpirationDate($expirationDate)
+    {
+        $this->expirationDate = $expirationDate;
     }
 
     /**

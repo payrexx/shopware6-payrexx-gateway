@@ -2,25 +2,25 @@
     "packages": [
         {
             "name": "payrexx/payrexx",
-            "version": "1.7.3",
-            "version_normalized": "1.7.3.0",
+            "version": "v1.7.4",
+            "version_normalized": "1.7.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/payrexx/payrexx-php.git",
-                "reference": "1a779326b1bbd317dc942ad2db60ec564bd98b68"
+                "reference": "0cfdafe40e893b12df48d21cd83a5cf3c21b3055"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/1a779326b1bbd317dc942ad2db60ec564bd98b68",
-                "reference": "1a779326b1bbd317dc942ad2db60ec564bd98b68",
+                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/0cfdafe40e893b12df48d21cd83a5cf3c21b3055",
+                "reference": "0cfdafe40e893b12df48d21cd83a5cf3c21b3055",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
-            "time": "2020-06-04T14:10:16+00:00",
+            "time": "2021-03-11T15:59:11+00:00",
             "type": "library",
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-0": {
                     "Payrexx": "lib/"
@@ -42,6 +42,10 @@
                 "gateway",
                 "payment"
             ],
+            "support": {
+                "issues": "https://github.com/payrexx/payrexx-php/issues",
+                "source": "https://github.com/payrexx/payrexx-php/tree/v1.7.4"
+            },
             "install-path": "../payrexx/payrexx"
         }
     ],
