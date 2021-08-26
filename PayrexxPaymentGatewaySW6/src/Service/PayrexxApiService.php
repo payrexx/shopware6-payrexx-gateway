@@ -2,7 +2,7 @@
 
 namespace PayrexxPaymentGateway\Service;
 
-use PayrexxPaymentGateway\Handler\PaymentHandler;
+use Payrexx\Communicator;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
@@ -46,7 +46,7 @@ class PayrexxApiService
     private function getInterface($salesChannelId): \Payrexx\Payrexx
     {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
-        $platform = !empty($config['platform']) ? $config['platform'] : '';
+        $platform = !empty($config['platform']) ? $config['platform'] : Communicator::API_URL_BASE_DOMAIN;
         return new \Payrexx\Payrexx($config['instanceName'], $config['apiKey'], '', $platform);
     }
 
