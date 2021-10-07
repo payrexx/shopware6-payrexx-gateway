@@ -19,6 +19,10 @@
                     <id>shop-and-pay.com</id>
                     <name>Shop and Pay</name>
                 </option>
+                <option>
+                    <id>ideal-pay.ch</id>
+                    <name>Ideal Pay</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
