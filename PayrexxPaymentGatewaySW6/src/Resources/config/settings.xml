@@ -23,6 +23,10 @@
                     <id>ideal-pay.ch</id>
                     <name>Ideal Pay</name>
                 </option>
+                <option>
+                    <id>zahls.ch</id>
+                    <name>zahls.ch</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
