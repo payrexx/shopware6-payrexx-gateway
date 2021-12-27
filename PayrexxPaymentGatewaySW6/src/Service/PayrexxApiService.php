@@ -87,10 +87,6 @@ class PayrexxApiService
         $gateway->addField('postcode', $customer['postcode']);
         $gateway->addField('place', $customer['place']);
         $gateway->addField('email', $customer['email']);
-        $gateway->addField('custom_field_1', $orderNumber, [
-            1 => 'Shopware Bestellnummer',
-            2 => 'Shopware Order ID',
-        ]);
 
         try {
             return $payrexx->create($gateway);

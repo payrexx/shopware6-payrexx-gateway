@@ -21,7 +21,8 @@ use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -104,28 +105,40 @@ class Dispatcher
         $content = json_decode($request->getContent());
 
         $requestTransaction = $content->transaction;
-        $swTransactionId = $requestTransaction->referenceId;
+        $swOrderNumber = $requestTransaction->referenceId;
         $requestGatewayId = $requestTransaction->invoice->paymentRequestId;
 
         // check required data
-        if (!$swTransactionId || !$requestTransaction->status || !$requestTransaction->id) {
+        if (!$swOrderNumber || !$requestTransaction->status || !$requestTransaction->id) {
             return new Response('Data incomplete', Response::HTTP_BAD_REQUEST);
         }
 
         try {
-            $transactionRepo = $this->container->get('order_transaction.repository');
-            $transactionDetails = $transactionRepo->search(
-                (new Criteria([$swTransactionId]))->addAssociation('customFields'),
-                $context
-            );
-            $transaction = $transactionDetails->first();
-
             $orderRepo = $this->container->get('order.repository');
-            $orderDetails = $orderRepo->search(
-                (new Criteria([$transaction->getOrderId()]))->addAssociation('customFields'),
-                $context
-            );
-            $order = $orderDetails->first();
+            $transactionRepo = $this->container->get('order_transaction.repository');
+
+            // TODO: Remove if and only keep else content
+            if(preg_match("/[a-z]/i", $swOrderNumber)){
+                $transactionDetails = $transactionRepo->search(
+                    (new Criteria())
+                        ->addFilter(new EqualsFilter('id', $swOrderNumber))
+                        ->addAssociation('order'),
+                    $context
+                );
+                $transaction = $transactionDetails->first();
+                $order = $transaction->getOrder();
+            } else {
+                $orderDetails = $orderRepo->search(
+                    (new Criteria())
+                        ->addFilter(new EqualsFilter('orderNumber', $swOrderNumber))
+                        ->addAssociation('transactions'),
+                    $context
+                );
+                $order = $orderDetails->first();
+                $transaction = $order->getTransactions()->first();
+            }
+
+
         } catch (\Payrexx\PayrexxException $e) {
             return new Response('Data incorrect', Response::HTTP_BAD_REQUEST);
         }
