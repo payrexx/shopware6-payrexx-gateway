@@ -56,6 +56,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_KLARNA_PAYNOW      = 'klarna_paynow';
     public const PAYREXX_KLARNA_PAYLATER    = 'klarna_paylater';
     public const PAYREXX_ONEY               = 'oney';
+    public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
         self::PAYREXX_MASTERPASS => [
@@ -523,6 +524,19 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Oney',
+                ],
+            ],
+        ],
+        self::PAYREXX_NO_PM => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Zahlungsmittelauswahl nach Weiterleitung zum Zahlungsterminal',
+                ],
+                'de-CH' => [
+                    'name' => 'Zahlungsmittelauswahl nach Weiterleitung zum Zahlungsterminal',
+                ],
+                'en-GB' => [
+                    'name' => 'Payment method selection after forwarding to the payment terminal',
                 ],
             ],
         ],

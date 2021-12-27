@@ -9,7 +9,9 @@ use PayrexxPaymentGateway\Service\ConfigService;
 use PayrexxPaymentGateway\Service\PayrexxApiService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity;
+use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates;
+use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\Request;
 use PayrexxPaymentGateway\Service\CustomerService;
@@ -106,15 +108,17 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      */
     public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
     {
-        $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
+        $orderTransaction = $transaction->getOrderTransaction();
+        $order = $transaction->getOrder();
+        $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
         $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
-        $transactionId = $transaction->getOrderTransaction()->getId();
+        $transactionId = $orderTransaction->getId();
 
-        $paymentMethodRepository = $this->container->get('payment_method.repository');
+        $paymentMethodRepo = $this->container->get('payment_method.repository');
         $paymentCriteria = (new Criteria())->addFilter(
-            new EqualsFilter('id', $transaction->getOrderTransaction()->getPaymentMethodId())
+            new EqualsFilter('id', $orderTransaction->getPaymentMethodId())
         );
-        $paymentMethod = $paymentMethodRepository->search($paymentCriteria, $salesChannelContext->getContext())->first();
+        $paymentMethod = $paymentMethodRepo->search($paymentCriteria, $salesChannelContext->getContext())->first();
         $customFields = $paymentMethod->getCustomFields();
 
         $paymentMethodName = '';
@@ -125,6 +129,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
+        $basket = $this->collectBasketData($order, $totalAmount, $salesChannelContext);
+
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
             $redirectUrl = $transaction->getReturnUrl();
@@ -132,11 +138,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         try {
-            $customer = $this->customerService->getCustomerDetails($transaction->getOrder()->getOrderCustomer()->getCustomerId(), Context::createDefaultContext());
+            $customer = $this->customerService->getCustomerDetails($order->getOrderCustomer()->getCustomerId(), Context::createDefaultContext());
         } catch (\Exception $e) {
             throw new AsyncPaymentProcessException(
                 $transactionId,
-                'An error occurred during processing the customer details' . PHP_EOL . $e->getMessage()
+                'An error occurred while processing the customer details' . PHP_EOL . $e->getMessage()
             );
         }
 
@@ -144,12 +150,13 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         try {
 
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
-                $transactionId,
+                $order->getOrderNumber(),
                 $totalAmount,
                 $salesChannelContext->getCurrency()->getIsoCode(),
                 $paymentMean,
                 $customer,
                 $transaction->getReturnUrl(),
+                $basket,
                 $salesChannelId
             );
 
@@ -175,14 +182,15 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     {
         $context = $salesChannelContext->getContext();
 
-        $customFields = $transaction->getOrderTransaction()->getCustomFields();
+        $orderTransaction = $transaction->getOrderTransaction();
+        $customFields = $orderTransaction->getCustomFields();
         $gatewayId = $customFields['gateway_id'];
-        $transactionId = $transaction->getOrderTransaction()->getId();
-        $totalAmount = $transaction->getOrderTransaction()->getAmount()->getTotalPrice();
+        $transactionId = $orderTransaction->getId();
+        $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
         if ($totalAmount <= 0) {
-            if (OrderTransactionStates::STATE_PAID === $transaction->getOrderTransaction()->getStateMachineState()->getTechnicalName()) return;
-            $this->transactionStateHandler->paid($transaction->getOrderTransaction()->getId(), $context);
+            if (OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()) return;
+            $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
             return;
         }
 
@@ -192,7 +200,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 'Customer canceled the payment on the Payrexx page'
             );
         }
-
 
         $payrexxGateway = $this->payrexxApiService->getPayrexxGateway($gatewayId, $salesChannelContext->getSalesChannel()->getId());
         $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelContext->getSalesChannel()->getId());
@@ -211,7 +218,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if (!$transaction) {
             return;
         }
-        $this->transactionHandler->handleTransactionStatus($transaction->getOrderTransaction(), $payrexxTransactionStatus, $context);
+        $this->transactionHandler->handleTransactionStatus($orderTransaction, $payrexxTransactionStatus, $context);
 
         $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $gatewayId]);
 
@@ -222,5 +229,64 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $transactionId,
             'Customer canceled the payment on the Payrexx page'
         );
+    }
+
+    private function collectBasketData(OrderEntity $order, $totalAmount, $salesChannelContext):array
+    {
+        // Collect basket data
+        $basketTotal = 0;
+        $basket = [];
+        foreach ($order->getLineItems()->getElements() as $item) {
+            $unitPrice = $item->getUnitPrice();
+            $quantity = $item->getQuantity();
+
+            $basket[] = [
+                'name' => $item->getLabel(),
+                'description' => $item->getDescription(),
+                'quantity' => $item->getQuantity(),
+                'amount' => $unitPrice * 100,
+                'sku' => isset($item->getPayload()['productNumber']) ? $item->getPayload()['productNumber'] : '',
+            ];
+            $basketTotal += $unitPrice * $quantity;
+        }
+
+        $shippingMethodRepo = $this->container->get('shipping_method.repository');
+        foreach ($order->getDeliveries()->getElements() as $delivery) {
+            $shippingCriteria = (new Criteria())->addFilter(
+                new EqualsFilter('id', $delivery->getShippingMethodId())
+            );
+            $shippingMethod = $shippingMethodRepo->search($shippingCriteria, $salesChannelContext->getContext())->first();
+
+            $unitPrice = $delivery->getShippingCosts()->getUnitPrice() ;
+            $quantity = $delivery->getShippingCosts()->getQuantity();
+
+            $basket[] = [
+                'name' => $shippingMethod->getTranslated()['name'] ?: $shippingMethod->getName(),
+                'description' => $shippingMethod->getTranslated()['description'] ?: $shippingMethod->getDescription(),
+                'quantity' => $quantity,
+                'amount' => $unitPrice * 100,
+                'sku' => $shippingMethod->getId(),
+            ];
+            $basketTotal += $unitPrice * $quantity;
+        }
+
+        if ($order->getTaxStatus() === CartPrice::TAX_STATE_NET) {
+            foreach ($order->getPrice()->getCalculatedTaxes()->getElements() as $tax) {
+                $unitPrice = $tax->getTax();
+                $quantity = 1;
+                $basket[] = [
+                    'name' => 'Tax ' . $tax->getTaxRate() . '%',
+                    'quantity' => $quantity,
+                    'amount' => $unitPrice * 100,
+                ];
+                $basketTotal += $unitPrice;
+            }
+        }
+
+        if ($totalAmount !== $basketTotal) {
+            return [];
+        }
+
+        return $basket;
     }
 }

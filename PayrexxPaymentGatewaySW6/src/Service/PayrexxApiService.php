@@ -63,7 +63,7 @@ class PayrexxApiService
      * @return Gateway
      *
      */
-    public function createPayrexxGateway(string $orderNumber, float $amount, string $currency, string $paymentMean, array $customer, string $url, string $salesChannelId)
+    public function createPayrexxGateway(string $orderNumber, float $amount, string $currency, string $paymentMean, array $customer, string $url, array $basket, string $salesChannelId)
     {
         $payrexx = $this->getInterface($salesChannelId);
         $gateway = new \Payrexx\Models\Request\Gateway();
@@ -73,6 +73,7 @@ class PayrexxApiService
         $gateway->setFailedRedirectUrl($url);
         $gateway->setCancelRedirectUrl($url);
         $gateway->setSkipResultPage(true);
+        $gateway->setBasket($basket);
 
         $gateway->setPsp([]);
         $gateway->setPm([$paymentMean]);
