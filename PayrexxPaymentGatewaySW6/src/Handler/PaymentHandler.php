@@ -236,7 +236,12 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         // Collect basket data
         $basketTotal = 0;
         $basket = [];
-        foreach ($order->getLineItems()->getElements() as $item) {
+
+        $lineItemElements = [];
+        if ($order->getLineItems()) {
+            $lineItemElements = $order->getLineItems()->getElements();
+        }
+        foreach ($lineItemElements as $item) {
             $unitPrice = $item->getUnitPrice();
             $quantity = $item->getQuantity();
 
@@ -251,7 +256,12 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         $shippingMethodRepo = $this->container->get('shipping_method.repository');
-        foreach ($order->getDeliveries()->getElements() as $delivery) {
+
+        $deliveryElements = [];
+        if ($order->getDeliveries()) {
+            $deliveryElements = $order->getDeliveries()->getElements();
+        }
+        foreach ($deliveryElements as $delivery) {
             $shippingCriteria = (new Criteria())->addFilter(
                 new EqualsFilter('id', $delivery->getShippingMethodId())
             );
@@ -270,8 +280,12 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $basketTotal += $unitPrice * $quantity;
         }
 
+        $taxElements = [];
+        if ($order->getPrice() && $order->getPrice()->getCalculatedTaxes()) {
+            $taxElements = $order->getPrice()->getCalculatedTaxes();
+        }
         if ($order->getTaxStatus() === CartPrice::TAX_STATE_NET) {
-            foreach ($order->getPrice()->getCalculatedTaxes()->getElements() as $tax) {
+            foreach ($taxElements as $tax) {
                 $unitPrice = $tax->getTax();
                 $quantity = 1;
                 $basket[] = [
