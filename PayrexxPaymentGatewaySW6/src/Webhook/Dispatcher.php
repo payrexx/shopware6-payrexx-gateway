@@ -118,7 +118,7 @@ class Dispatcher
             $transactionRepo = $this->container->get('order_transaction.repository');
 
             // TODO: Remove if and only keep else content
-            if(preg_match("/[a-z]/i", $swOrderNumber)){
+            if (preg_match("/[a-z]{30,}/i", $swOrderNumber)) {
                 $transactionDetails = $transactionRepo->search(
                     (new Criteria())
                         ->addFilter(new EqualsFilter('id', $swOrderNumber))

@@ -95,15 +95,13 @@ class TransactionHandler
                 $this->transactionStateHandler->refundPartially($orderTransaction->getId(), $context);
                 break;
             case Transaction::CANCELLED:
+            case Transaction::DECLINED:
+            case Transaction::EXPIRED:
                 if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_CANCELLED, OrderTransactionStates::STATE_PAID])) break;
                 $this->transactionStateHandler->cancel($orderTransaction->getId(), $context);
                 break;
-            case Transaction::EXPIRED:
-                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_CANCELLED, OrderTransactionStates::STATE_PAID, OrderTransactionStates::STATE_IN_PROGRESS])) break;
-                $this->transactionStateHandler->cancel($orderTransaction->getId(), $context);
-                break;
             case Transaction::ERROR:
-                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_FAILED, OrderTransactionStates::STATE_PAID, OrderTransactionStates::STATE_IN_PROGRESS])) break;
+                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_FAILED, OrderTransactionStates::STATE_PAID])) break;
                 $this->transactionStateHandler->fail($orderTransaction->getId(), $context);
                 break;
         }
