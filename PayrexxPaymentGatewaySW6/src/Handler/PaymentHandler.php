@@ -222,7 +222,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $gatewayId]);
 
-        if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::EXPIRED, Transaction::ERROR])){
+        if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::DECLINED, Transaction::EXPIRED, Transaction::ERROR])){
             return;
         }
         throw new CustomerCanceledAsyncPaymentException(
