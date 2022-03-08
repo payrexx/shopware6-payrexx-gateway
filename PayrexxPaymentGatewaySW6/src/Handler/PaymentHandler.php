@@ -119,11 +119,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             new EqualsFilter('id', $orderTransaction->getPaymentMethodId())
         );
         $paymentMethod = $paymentMethodRepo->search($paymentCriteria, $salesChannelContext->getContext())->first();
-        $customFields = $paymentMethod->getCustomFields();
+        $customFields = isset($paymentMethod->getTranslated()['customFields']) ? $paymentMethod->getTranslated()['customFields'] : [];
 
         $paymentMethodName = '';
 
-        if ($customFields) {
+        if (isset($customFields['payrexx_payment_method_name'])) {
             $paymentMethodName = $customFields['payrexx_payment_method_name'] ?: $paymentMethodName;
         }
 

@@ -23,6 +23,10 @@
                     <id>ideal-pay.ch</id>
                     <name>Ideal Pay</name>
                 </option>
+                <option>
+                    <id>payzzter.com</id>
+                    <name>Payzzter</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
