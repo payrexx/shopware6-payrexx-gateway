@@ -3,6 +3,7 @@
 namespace PayrexxPaymentGateway\Service;
 
 use Payrexx\Communicator;
+use Payrexx\Models\Response\Transaction;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
@@ -63,17 +64,22 @@ class PayrexxApiService
      * @return Gateway
      *
      */
-    public function createPayrexxGateway(string $orderNumber, float $amount, string $currency, string $paymentMean, array $customer, string $url, array $basket, string $salesChannelId)
+    public function createPayrexxGateway(string $orderNumber, float $amount, float $averageVatRate, string $currency, string $paymentMean, array $customer, string $url, array $basket, string $salesChannelId)
     {
+        $config = $this->configService->getPluginConfiguration($salesChannelId);
+        $lookAndFeelId = !empty($config['lookFeelID']) ? $config['lookFeelID'] : null;
+
         $payrexx = $this->getInterface($salesChannelId);
         $gateway = new \Payrexx\Models\Request\Gateway();
         $gateway->setAmount($amount * 100);
+        $gateway->setVatRate($averageVatRate);
         $gateway->setCurrency($currency);
         $gateway->setSuccessRedirectUrl($url);
         $gateway->setFailedRedirectUrl($url);
         $gateway->setCancelRedirectUrl($url);
         $gateway->setSkipResultPage(true);
         $gateway->setBasket($basket);
+        $gateway->setLookAndFeelProfile($lookAndFeelId);
 
         $gateway->setPsp([]);
         $gateway->setPm([$paymentMean]);
@@ -144,7 +150,7 @@ class PayrexxApiService
 
     public function getTransactionByGateway($payrexxGateway, $salesChannelId): ?\Payrexx\Models\Response\Transaction
     {
-        if (!in_array($payrexxGateway->getStatus(), ['confirmed', 'waiting'])) {
+        if (!in_array($payrexxGateway->getStatus(), [Transaction::CONFIRMED, Transaction::WAITING])) {
             return null;
         }
         $invoices = $payrexxGateway->getInvoices();
@@ -152,12 +158,12 @@ class PayrexxApiService
         if (!$invoices || !$invoice = $invoices[0]) {
             return null;
         }
-        $transactions = $invoice['transactions'];
-        if (!$transactions || !$transactions[0]['id']) {
+
+        if (!$transactions = $invoice['transactions']) {
             return null;
         }
 
-        return $this->getPayrexxTransaction($transactions[0]['id'], $salesChannelId);
+        return $this->getPayrexxTransaction(end($transactions)['id'], $salesChannelId);
     }
 
     public function getPayrexxTransaction(int $payrexxTransactionId, $salesChannelId): ?\Payrexx\Models\Response\Transaction

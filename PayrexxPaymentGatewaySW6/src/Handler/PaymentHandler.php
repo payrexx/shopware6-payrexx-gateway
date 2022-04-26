@@ -130,6 +130,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
         $basket = $this->collectBasketData($order, $totalAmount, $salesChannelContext);
+        $averageVatRate = $this->getAverageTaxRate($order);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
@@ -148,10 +149,10 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         // Create Payrexx Gateway link for checkout and redirect user
         try {
-
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
                 $order->getOrderNumber(),
                 $totalAmount,
+                $averageVatRate,
                 $salesChannelContext->getCurrency()->getIsoCode(),
                 $paymentMean,
                 $customer,
@@ -210,6 +211,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 'Customer canceled the payment on the Payrexx page'
             );
         }
+
         $payrexxTransactionStatus = $payrexxTransaction->getStatus();
         if ($totalAmount <= 0) {
             $payrexxTransactionStatus = Transaction::CONFIRMED;
@@ -302,5 +304,21 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         return $basket;
+    }
+
+    private function getAverageTaxRate(OrderEntity $order): float {
+        if (!$order->getPrice() || !$order->getPrice()->getCalculatedTaxes()) {
+            return 0;
+        }
+
+        $taxRate = 0;
+        $taxElements = $order->getPrice()->getCalculatedTaxes();
+        foreach ($taxElements as $tax) {
+            $taxRate += $tax->getTaxRate();
+        }
+
+        $finalTaxRate = ($taxRate / count($taxElements));
+
+        return $finalTaxRate;
     }
 }

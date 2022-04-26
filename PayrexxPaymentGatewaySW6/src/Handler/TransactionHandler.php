@@ -83,7 +83,7 @@ class TransactionHandler
                 $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
                 break;
             case Transaction::WAITING:
-                if (OrderTransactionStates::STATE_IN_PROGRESS === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
+                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_IN_PROGRESS, OrderTransactionStates::STATE_PAID])) break;
                 $this->transactionStateHandler->process($orderTransaction->getId(), $context);
                 break;
             case Transaction::REFUNDED:
