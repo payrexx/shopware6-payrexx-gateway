@@ -34,6 +34,7 @@ Module.register('payrexx-payment', {
         }
     },
     settingsItem: {
+        name: 'payrexx-payment-settings',
         group: 'plugins',
         to: 'payrexx.payment.index',
         iconComponent: 'payrexx-payment-settings-icon',
