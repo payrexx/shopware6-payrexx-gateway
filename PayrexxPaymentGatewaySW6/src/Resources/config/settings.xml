@@ -27,6 +27,10 @@
                     <id>payzzter.com</id>
                     <name>Payzzter</name>
                 </option>
+                <option>
+                    <id>go2flow.finance</id>
+                    <name>Go2Flow</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
