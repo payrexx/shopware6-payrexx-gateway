@@ -312,7 +312,10 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         $taxRate = 0;
+        $finalTaxRate = 0;
         $taxElements = $order->getPrice()->getCalculatedTaxes();
+
+        if (!count($taxElements)) return $finalTaxRate;
         foreach ($taxElements as $tax) {
             $taxRate += $tax->getTaxRate();
         }
