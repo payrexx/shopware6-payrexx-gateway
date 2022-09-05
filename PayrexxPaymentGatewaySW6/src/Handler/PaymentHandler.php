@@ -179,11 +179,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param SalesChannelContext $salesChannelContext
      * @throws CustomerCanceledAsyncPaymentException
      */
-    public function finalize(AsyncPaymentTransactionStruct $transaction, Request $request, SalesChannelContext $salesChannelContext): void
+    public function finalize(AsyncPaymentTransactionStruct $shopwareTransaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
         $context = $salesChannelContext->getContext();
 
-        $orderTransaction = $transaction->getOrderTransaction();
+        $orderTransaction = $shopwareTransaction->getOrderTransaction();
         $customFields = $orderTransaction->getCustomFields();
         $gatewayId = $customFields['gateway_id'];
         $transactionId = $orderTransaction->getId();
@@ -217,12 +217,10 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $payrexxTransactionStatus = Transaction::CONFIRMED;
         }
 
-        if (!$transaction) {
+        if (!$shopwareTransaction) {
             return;
         }
         $this->transactionHandler->handleTransactionStatus($orderTransaction, $payrexxTransactionStatus, $context);
-
-        $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $gatewayId]);
 
         if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::DECLINED, Transaction::EXPIRED, Transaction::ERROR])){
             return;
