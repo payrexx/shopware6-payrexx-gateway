@@ -31,6 +31,10 @@
                     <id>go2flow.finance</id>
                     <name>Go2Flow</name>
                 </option>
+                <option>
+                    <id>guvoto-pay.ch</id>
+                    <name>Guvoto-Pay</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
