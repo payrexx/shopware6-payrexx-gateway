@@ -35,6 +35,10 @@
                     <id>guvoto-pay.ch</id>
                     <name>Guvoto-Pay</name>
                 </option>
+                <option>
+                    <id>select2pay.at</id>
+                    <name>Select2Pay</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
