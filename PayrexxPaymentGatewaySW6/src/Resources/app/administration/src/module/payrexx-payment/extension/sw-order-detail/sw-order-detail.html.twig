@@ -1,0 +1,14 @@
+{% block sw_order_detail_actions_slot_smart_bar_actions %}
+    {% parent %}
+
+    {% block sw_order_detail_payrexx_actions %}
+        <sw-button
+                v-if="!isEditing && isPayrexxPayment"
+                class="sw-order-detail__smart-bar-refund-button"
+                :disabled="isLoading || !isRefundable"
+{#                @click="onCancelEditing"#}
+        >
+            {{ $tc('payrexx-payment.orderDetail.refundButton') }}
+        </sw-button>
+    {% endblock %}
+{% endblock %}

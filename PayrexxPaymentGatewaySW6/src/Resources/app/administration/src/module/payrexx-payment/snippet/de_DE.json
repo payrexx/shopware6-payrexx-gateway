@@ -25,6 +25,9 @@
             "supportDesc": "Kontaktieren Sie unser Support-Team",
             "manualButton": "Dokumentation",
             "manualDesc": "Lesen Sie unsere Integrations Anleitung"
+        },
+        "orderDetail": {
+            "refundButton": "Rückerstattung"
         }
     }
 }

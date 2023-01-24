@@ -25,6 +25,9 @@
           "supportDesc": "Contact our support team",
           "manualButton": "Manual",
           "manualDesc": "Read our integration manual"
+      },
+      "orderDetail": {
+          "refundButton": "Refund"
       }
   }
 }

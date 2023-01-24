@@ -1,5 +1,6 @@
 import './components/payrexx-payment-settings-icon';
 import './extension/sw-settings-index';
+import './extension/sw-order-detail';
 import './page/payrexx-settings';
 
 import deDE from './snippet/de_DE.json';
