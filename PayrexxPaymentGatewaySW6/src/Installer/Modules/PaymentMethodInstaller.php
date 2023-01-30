@@ -56,6 +56,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_KLARNA_PAYNOW      = 'klarna_paynow';
     public const PAYREXX_KLARNA_PAYLATER    = 'klarna_paylater';
     public const PAYREXX_ONEY               = 'oney';
+    public const PAYREXX_BOB_INVOICE        = 'bob-invoice';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -418,6 +419,16 @@ class PaymentMethodInstaller implements InstallerInterface
                     'name' => 'Oney',
                 ],
             ],
+        ],
+        self::PAYREXX_BOB_INVOICE => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Bob Invoice',
+                ],
+                'de-GB' => [
+                    'name' => 'Bob Invoice',
+                ],
+            ]
         ],
         self::PAYREXX_NO_PM => [
             'translations' => [
