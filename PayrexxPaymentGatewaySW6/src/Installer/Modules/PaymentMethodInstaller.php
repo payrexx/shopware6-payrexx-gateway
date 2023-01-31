@@ -425,7 +425,7 @@ class PaymentMethodInstaller implements InstallerInterface
                 'de-DE' => [
                     'name' => 'Bob Invoice',
                 ],
-                'de-GB' => [
+                'en-GB' => [
                     'name' => 'Bob Invoice',
                 ],
             ]
