@@ -88,11 +88,12 @@ class PayrexxApiService
 
         $gateway->addField('forename', $customer['forename']);
         $gateway->addField('surname', $customer['surname']);
+        $gateway->addField('email', $customer['email']);
         $gateway->addField('company', $customer['company']);
         $gateway->addField('street', $customer['street']);
         $gateway->addField('postcode', $customer['postcode']);
         $gateway->addField('place', $customer['place']);
-        $gateway->addField('email', $customer['email']);
+        $gateway->addField('country', $customer['country']);
 
         try {
             return $payrexx->create($gateway);
