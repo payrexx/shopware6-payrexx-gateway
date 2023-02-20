@@ -139,7 +139,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         try {
-            $customer = $this->customerService->getCustomerDetails($order->getOrderCustomer()->getCustomerId(), Context::createDefaultContext());
+            $customer = $this->customerService->getCustomerDetails($order, Context::createDefaultContext());
         } catch (\Exception $e) {
             throw new AsyncPaymentProcessException(
                 $transactionId,

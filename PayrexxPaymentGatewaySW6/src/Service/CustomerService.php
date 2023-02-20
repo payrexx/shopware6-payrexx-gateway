@@ -4,7 +4,8 @@ namespace PayrexxPaymentGateway\Service;
 
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
+use Shopware\Core\Checkout\Order\OrderEntity;
+use Shopware\Core\Checkout\Order\Aggregate\OrderAddress\OrderAddressEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -14,7 +15,7 @@ class CustomerService
     /**
      * @var EntityRepository 
      */
-    protected $customerRepository;
+    protected $addressRepository;
 
     /**
      * @var LoggerInterface 
@@ -24,45 +25,36 @@ class CustomerService
     /**
      * Constructor
      *
-     * @param EntityRepository $customerRepository
+     * @param EntityRepository $addressRepository
      * @param LoggerInterface $logger
      */
-    public function __construct(EntityRepository $customerRepository, LoggerInterface $logger)
+    public function __construct(EntityRepository $addressRepository, LoggerInterface $logger)
     {
-        $this->customerRepository = $customerRepository;
+        $this->addressRepository = $addressRepository;
         $this->logger = $logger;
     }
 
     /**
      * Returns the customer details
      *
-     * @param string $customerId
+     * @param OrderEntity $order
      * @param Context $context
      * @return array
      */
-    public function getCustomerDetails(string $customerId, Context $context): array
+    public function getCustomerDetails(OrderEntity $order, Context $context): array
     {
-        $customer = null;
-
         try {
             $criteria = new Criteria();
-            $criteria->addFilter(new EqualsFilter('id', $customerId));
-            $criteria->addAssociation('activeShippingAddress');
-            $criteria->addAssociation('activeBillingAddress');
-            $criteria->addAssociation('defaultShippingAddress');
-            $criteria->addAssociation('defaultBillingAddress');
+            $criteria->addFilter(new EqualsFilter('id', $order->getBillingAddressId()));
+            $criteria->addAssociation('country');
 
-            /** @var CustomerEntity $customer */
-            $customer = $this->customerRepository->search($criteria, $context)->first();
+            /** @var OrderAddressEntity $address */
+            $address = $this->addressRepository->search($criteria, $context)->first();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), [$e]);
         }
 
-        $address = $customer->getDefaultBillingAddress();
-
-        if ($address === null) {
-            return [];
-        }
+        $customer = $order->getOrderCustomer();
         
         return [
             'forename' => $address->getFirstName(),
@@ -72,6 +64,7 @@ class CustomerService
             'postcode' => $address->getZipCode(),
             'place' => $address->getCity(),
             'email' => $customer->getEmail(),
+            'country' => $address->getCountry()->getIso(),
         ];
     }
 }

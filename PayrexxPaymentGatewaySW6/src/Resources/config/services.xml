@@ -25,7 +25,7 @@
         </service>
 
         <service id="PayrexxPaymentGateway\Service\CustomerService" class="PayrexxPaymentGateway\Service\CustomerService">
-            <argument type="service" id="customer.repository" />
+            <argument type="service" id="order_address.repository" />
             <argument type="service" id="monolog.logger"/>
         </service>
         <service id="PayrexxPaymentGateway\Service\PayrexxApiService" class="PayrexxPaymentGateway\Service\PayrexxApiService">
