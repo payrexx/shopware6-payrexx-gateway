@@ -27,7 +27,7 @@ export default class ApplePay extends Plugin {
             if (deviceSupported) {
                 return;
             }
-            jQuery("#payrexx-applepay-check").parent().remove();
+            jQuery("#payrexx-applepay-check").parent('.payment-method').remove();
         }
     }
 }

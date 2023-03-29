@@ -59,7 +59,7 @@ export default class GooglePay extends Plugin {
                 console.warn("Payrexx GooglePay is not supported on this device/browser");
                 return;
             }
-            jQuery("#payrexx-googlepay-check").parent().remove();
+            jQuery("#payrexx-googlepay-check").parent('.payment-method').remove();
         }
     }
 }
