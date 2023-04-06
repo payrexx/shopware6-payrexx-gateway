@@ -39,14 +39,15 @@ export default class GooglePay extends Plugin {
                     if (response.result) {
                         return true;
                     }
+                    return false;
                 }).catch(function(err) {
                     console.log(err);
+                    return false;
                 });
-                return false;
             } catch (err) {
                 console.log(err);
+                return false;
             }
-            return false;
         }
 
         /**
