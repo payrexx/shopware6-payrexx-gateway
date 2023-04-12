@@ -1,8 +1,8 @@
 // Import all necessary Storefront plugins
-import GooglePay from './google-pay/google-pay-check';
-import ApplePay from './apple-pay/apple-pay-check';
+import GooglePay from './GooglePay/google-pay';
+import ApplePay from './ApplePay/apple-pay';
 
 // Register the plugin via the existing PluginManager
 const PluginManager = window.PluginManager;
-PluginManager.register('GooglePay', GooglePay, '[data-payrexx-googlepay-check]');
-PluginManager.register('ApplePay', ApplePay, '[data-payrexx-applepay-check]');
+PluginManager.register('GooglePay', GooglePay, '[data-payrexx-google-pay]');
+PluginManager.register('ApplePay', ApplePay, '[data-payrexx-apple-pay');
