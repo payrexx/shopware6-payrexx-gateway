@@ -4,12 +4,12 @@
     {{ parent() }}
     {% if payment.customFields.payrexx_payment_method_name == 'payrexx_payment_apple_pay' %}
         <div id='payrexx-applepay'>
-            {% include '@PayrexxPaymentGatewaySW6/storefront/payrexx/apple-pay.html.twig' %}
+            <template data-payrexx-apple-pay></template>
         </div>
-    {% endif %}
-    {% if payment.customFields.payrexx_payment_method_name == 'payrexx_payment_google_pay' %}
+    {% elseif payment.customFields.payrexx_payment_method_name == 'payrexx_payment_google_pay' %}
         <div id='payrexx-googlepay'>
-            {% include '@PayrexxPaymentGatewaySW6/storefront/payrexx/google-pay.html.twig' %}
+            <script src="https://pay.google.com/gp/p/js/pay.js"></script>
+            <template data-payrexx-google-pay></template>
         </div>
     {% endif %}
 {% endblock %}
