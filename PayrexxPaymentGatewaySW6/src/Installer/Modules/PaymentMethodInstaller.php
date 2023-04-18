@@ -521,7 +521,6 @@ class PaymentMethodInstaller implements InstallerInterface
             $paymentMethodActive = $paymentMethod->getActive();
         }
 
-        $isApplePay = $payrexxPaymentMethodIdentifier == self::PAYREXX_APPLE_PAY;
         $options = [
             'id' => $paymentMethodId,
             'handlerIdentifier' => PaymentHandler::class,
@@ -531,8 +530,6 @@ class PaymentMethodInstaller implements InstallerInterface
             'pluginId' => $pluginId,
             'customFields' => [
                 'payrexx_payment_method_name' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
-                'is_payrexx_applepay' => $isApplePay,
-                'template' => $isApplePay ? '@PayrexxPaymentGatewaySW6/storefront/payrexx/apple_pay_check.html.twig' : null,
             ]
         ];
 
