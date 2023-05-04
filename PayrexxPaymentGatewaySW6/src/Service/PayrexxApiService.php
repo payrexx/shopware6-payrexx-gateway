@@ -156,7 +156,7 @@ class PayrexxApiService
         }
         $invoices = $payrexxGateway->getInvoices();
 
-        if (!$invoices || !$invoice = $invoices[0]) {
+        if (!$invoices || !$invoice = end($invoices)) {
             return null;
         }
 
