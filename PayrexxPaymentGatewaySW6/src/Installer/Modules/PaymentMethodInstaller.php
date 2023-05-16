@@ -13,7 +13,7 @@ use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
@@ -464,14 +464,14 @@ class PaymentMethodInstaller implements InstallerInterface
         ],
     ];
 
-    /** @var EntityRepositoryInterface */
+    /** @var EntityRepository */
     private $paymentMethodRepository;
 
     /** @var PluginIdProvider */
     private $pluginIdProvider;
 
     public function __construct(
-        EntityRepositoryInterface $paymentMethodRepository,
+        EntityRepository $paymentMethodRepository,
         PluginIdProvider $pluginIdProvider
     ) {
         $this->paymentMethodRepository = $paymentMethodRepository;
@@ -496,21 +496,24 @@ class PaymentMethodInstaller implements InstallerInterface
     public function activate(ActivateContext $context): void
     {
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class));
-        $paymentMethods = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext());
 
-        foreach ($paymentMethods->getIds() as $paymentMethodId) {
-            $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, true);
+        $paymentMethodId = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+        if ($paymentMethodId === null) {
+            return;
         }
+
+        $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, true);
     }
 
     public function deactivate(DeactivateContext $context): void
     {
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class));
-        $paymentMethods = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext());
+        $paymentMethodId = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
 
-        foreach ($paymentMethods->getIds() as $paymentMethodId) {
-            $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, false);
+        if ($paymentMethodId === null) {
+            return;
         }
+        $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, false);
     }
 
     public function update(UpdateContext $context): void {
