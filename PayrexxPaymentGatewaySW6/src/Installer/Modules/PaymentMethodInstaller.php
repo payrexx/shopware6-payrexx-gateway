@@ -496,24 +496,21 @@ class PaymentMethodInstaller implements InstallerInterface
     public function activate(ActivateContext $context): void
     {
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class));
+        $paymentMethods = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext());
 
-        $paymentMethodId = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
-        if ($paymentMethodId === null) {
-            return;
+        foreach ($paymentMethods->getIds() as $paymentMethodId) {
+            $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, true);
         }
-
-        $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, true);
     }
 
     public function deactivate(DeactivateContext $context): void
     {
         $paymentCriteria = (new Criteria())->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class));
-        $paymentMethodId = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext())->firstId();
+        $paymentMethods = $this->paymentMethodRepository->searchIds($paymentCriteria, Context::createDefaultContext());
 
-        if ($paymentMethodId === null) {
-            return;
+        foreach ($paymentMethods->getIds() as $paymentMethodId) {
+            $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, false);
         }
-        $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, false);
     }
 
     public function update(UpdateContext $context): void {
