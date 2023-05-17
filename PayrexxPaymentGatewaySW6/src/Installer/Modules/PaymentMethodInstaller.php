@@ -13,7 +13,7 @@ use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
@@ -464,14 +464,14 @@ class PaymentMethodInstaller implements InstallerInterface
         ],
     ];
 
-    /** @var EntityRepositoryInterface */
+    /** @var EntityRepository */
     private $paymentMethodRepository;
 
     /** @var PluginIdProvider */
     private $pluginIdProvider;
 
     public function __construct(
-        EntityRepositoryInterface $paymentMethodRepository,
+        EntityRepository $paymentMethodRepository,
         PluginIdProvider $pluginIdProvider
     ) {
         $this->paymentMethodRepository = $paymentMethodRepository;
