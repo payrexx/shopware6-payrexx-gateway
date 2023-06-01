@@ -39,6 +39,10 @@
                     <id>select2pay.at</id>
                     <name>Select2Pay</name>
                 </option>
+                <option>
+                    <id>zahls.ch</id>
+                    <name>Zahls.ch</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
