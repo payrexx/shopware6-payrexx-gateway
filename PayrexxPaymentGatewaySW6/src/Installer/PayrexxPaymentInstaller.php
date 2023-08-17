@@ -3,6 +3,9 @@
 namespace PayrexxPaymentGateway\Installer;
 
 use PayrexxPaymentGateway\Installer\Modules\PaymentMethodInstaller;
+use PayrexxPaymentGateway\Util\Compatibility\EntityRepositoryDecorator;
+use Shopware\Core\Checkout\Payment\PaymentMethodDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\Plugin\Context\ActivateContext;
 use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
@@ -11,6 +14,7 @@ use Shopware\Core\Framework\Plugin\Context\UninstallContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class PayrexxPaymentInstaller implements InstallerInterface
 {
@@ -49,13 +53,21 @@ class PayrexxPaymentInstaller implements InstallerInterface
 
     private function getPaymentMethodInstaller(): InstallerInterface
     {
-        /** @var EntityRepositoryInterface $paymentMethodRepository */
-        $paymentMethodRepository = $this->container->get('payment_method.repository');
+        $entityName = \sprintf('%s.repository', PaymentMethodDefinition::ENTITY_NAME);
+        $entityRepository = $this->container->get($entityName, ContainerInterface::NULL_ON_INVALID_REFERENCE);
+
+        if (\interface_exists(EntityRepositoryInterface::class) && $entityRepository instanceof EntityRepositoryInterface) {
+            $entityRepository = new EntityRepositoryDecorator($entityRepository);
+        }
+     
+        if (!$entityRepository instanceof EntityRepository) {
+            throw new ServiceNotFoundException($entityName);
+        }
 
         /** @var PluginIdProvider $pluginIdProvider */
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
 
 
-        return new PaymentMethodInstaller($paymentMethodRepository, $pluginIdProvider);
+        return new PaymentMethodInstaller($entityRepository, $pluginIdProvider);
     }
 }
