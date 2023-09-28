@@ -127,8 +127,7 @@ class Dispatcher
                         ->addAssociation('order'),
                     $context
                 );
-                $transaction = $transactionDetails->first();
-                $order = $transaction->getOrder();
+                $order = $transactionDetails->first()->getOrder();
             } else {
                 $orderDetails = $orderRepo->search(
                     (new Criteria())
@@ -137,16 +136,22 @@ class Dispatcher
                     $context
                 );
                 $order = $orderDetails->first();
-                $transaction = $order->getTransactions()->first();
             }
 
+            $transaction = false;
+            foreach($order->getTransactions() as $orderTransaction) {
+                if ($orderTransaction->getCustomFields()['gateway_id'] === $requestGatewayId) {
+                    $transaction = $orderTransaction;
+                    break;
+                }
+            }
 
         } catch (\Payrexx\PayrexxException $e) {
             return new Response('Data incorrect', Response::HTTP_BAD_REQUEST);
         }
 
         // Validate request by gateway ID
-        if ($transaction->getCustomFields()['gateway_id'] != $requestGatewayId) {
+        if (!$transaction) {
             return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
         }
 
