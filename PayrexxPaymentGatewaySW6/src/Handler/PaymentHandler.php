@@ -162,6 +162,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             );
 
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
+            $this->transactionHandler->handleTransactionStatus(
+                $orderTransaction,
+                OrderTransactionStates::STATE_UNCONFIRMED,
+                $salesChannelContext->getContext()
+            );
             $redirectUrl = $payrexxGateway->getLink();
         } catch (\Exception $e) {
             throw new AsyncPaymentProcessException(

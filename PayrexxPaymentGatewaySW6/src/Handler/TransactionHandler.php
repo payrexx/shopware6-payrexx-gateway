@@ -78,13 +78,18 @@ class TransactionHandler
     public function handleTransactionStatus(OrderTransactionEntity $orderTransaction, string $payrexxTransactionStatus, Context $context)
     {
         switch ($payrexxTransactionStatus) {
+            case OrderTransactionStates::STATE_UNCONFIRMED:
+                if (OrderTransactionStates::STATE_OPEN === $orderTransaction->getStateMachineState()->getTechnicalName()) {
+                    $this->transactionStateHandler->processUnconfirmed($orderTransaction->getId(), $context);
+                    break;
+                }
             case Transaction::CONFIRMED:
                 if (OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
                 $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
                 break;
             case Transaction::WAITING:
                 if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_IN_PROGRESS, OrderTransactionStates::STATE_PAID])) break;
-                $this->transactionStateHandler->process($orderTransaction->getId(), $context);
+                $this->transactionStateHandler->reopen($orderTransaction->getId(), $context);
                 break;
             case Transaction::REFUNDED:
                 if (OrderTransactionStates::STATE_REFUNDED === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
