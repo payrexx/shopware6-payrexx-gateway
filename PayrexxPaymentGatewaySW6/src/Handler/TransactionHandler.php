@@ -72,54 +72,41 @@ class TransactionHandler
 
     /**
      * @param OrderTransactionEntity $transaction
-     * @param string $payrexxTransactionStatus
+     * @param $payrexxTransactionStatus
      * @param Context $context
      */
     public function handleTransactionStatus(OrderTransactionEntity $orderTransaction, string $payrexxTransactionStatus, Context $context)
     {
-        $stateTechnicalName = $orderTransaction->getStateMachineState()->getTechnicalName();
         switch ($payrexxTransactionStatus) {
             case OrderTransactionStates::STATE_UNCONFIRMED:
-                if (OrderTransactionStates::STATE_OPEN === $stateTechnicalName) {
+                if (OrderTransactionStates::STATE_OPEN === $orderTransaction->getStateMachineState()->getTechnicalName()) {
                     $this->transactionStateHandler->processUnconfirmed($orderTransaction->getId(), $context);
                     break;
                 }
             case Transaction::CONFIRMED:
-                if (OrderTransactionStates::STATE_PAID === $stateTechnicalName) {
-                    break;
-                }
+                if (OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
                 $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
                 break;
             case Transaction::WAITING:
-                if (in_array($stateTechnicalName, [OrderTransactionStates::ACTION_PROCESS_UNCONFIRMED])) {
-                    break;
-                }
+                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_IN_PROGRESS, OrderTransactionStates::STATE_PAID])) break;
                 $this->transactionStateHandler->reopen($orderTransaction->getId(), $context);
                 break;
             case Transaction::REFUNDED:
-                if (OrderTransactionStates::STATE_REFUNDED === $stateTechnicalName) {
-                    break;
-                }
+                if (OrderTransactionStates::STATE_REFUNDED === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
                 $this->transactionStateHandler->refund($orderTransaction->getId(), $context);
                 break;
             case Transaction::PARTIALLY_REFUNDED:
-                if (OrderTransactionStates::STATE_PARTIALLY_REFUNDED === $stateTechnicalName) {
-                    break;
-                }
+                if (OrderTransactionStates::STATE_PARTIALLY_REFUNDED === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
                 $this->transactionStateHandler->refundPartially($orderTransaction->getId(), $context);
                 break;
             case Transaction::CANCELLED:
             case Transaction::DECLINED:
             case Transaction::EXPIRED:
-                if (in_array($stateTechnicalName, [OrderTransactionStates::STATE_CANCELLED, OrderTransactionStates::STATE_PAID])) {
-                    break;
-                }
+                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_CANCELLED, OrderTransactionStates::STATE_PAID])) break;
                 $this->transactionStateHandler->cancel($orderTransaction->getId(), $context);
                 break;
             case Transaction::ERROR:
-                if (in_array($stateTechnicalName, [OrderTransactionStates::STATE_FAILED, OrderTransactionStates::STATE_PAID])) {
-                    break;
-                }
+                if (in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_FAILED, OrderTransactionStates::STATE_PAID])) break;
                 $this->transactionStateHandler->fail($orderTransaction->getId(), $context);
                 break;
         }
