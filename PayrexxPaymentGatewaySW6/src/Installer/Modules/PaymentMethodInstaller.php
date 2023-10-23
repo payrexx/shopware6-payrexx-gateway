@@ -16,9 +16,13 @@ use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Content\Media\File\MediaFile;
+use Shopware\Core\Content\Media\File\FileSaver;
+use Shopware\Core\Framework\Uuid\Uuid;
 
 class PaymentMethodInstaller implements InstallerInterface
 {
+    private const PAYMENT_METHOD_MEDIA_DIR  = 'Resources/icons';
 
     public const PAYREXX_MASTERPASS         = 'masterpass';
     public const PAYREXX_MASTERCARD         = 'mastercard';
@@ -470,12 +474,16 @@ class PaymentMethodInstaller implements InstallerInterface
     /** @var PluginIdProvider */
     private $pluginIdProvider;
 
+    private $payrexxMediaInstaller;
+
     public function __construct(
         EntityRepository $paymentMethodRepository,
-        PluginIdProvider $pluginIdProvider
+        PluginIdProvider $pluginIdProvider,
+        FileSaver $payrexxMediaInstaller
     ) {
         $this->paymentMethodRepository = $paymentMethodRepository;
         $this->pluginIdProvider        = $pluginIdProvider;
+        $this->payrexxMediaInstaller   = $payrexxMediaInstaller;
     }
 
     /**
@@ -531,6 +539,7 @@ class PaymentMethodInstaller implements InstallerInterface
         $criteria = (new Criteria())
             ->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class))
             ->addFilter(new EqualsFilter('customFields.payrexx_payment_method_name', PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier))
+            ->addAssociation('media')
             ->setLimit(1);
         $paymentMethods = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
 
@@ -562,6 +571,39 @@ class PaymentMethodInstaller implements InstallerInterface
         $context->scope(Context::SYSTEM_SCOPE, function (Context $context) use ($options): void {
             $this->paymentMethodRepository->upsert([$options], $context);
         });
+
+        if ($paymentMethod && $paymentMethod->getMediaId()) {
+            return;
+        }
+        $paymentMethods = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
+        $paymentMethod = $paymentMethods->getEntities()->first();
+        $paymentMethodId = $paymentMethod->getId();
+        $mediaId = Uuid::randomHex();
+        $this->paymentMethodRepository->update(
+            [[
+                'id' => $paymentMethod->getId(),
+                'media' => [
+                    'id' => $mediaId,
+                    // 'mediaFolderId' => $this->getMediaDefaultFolderId($context),
+                ],
+            ]],
+            $context
+        );
+        $mediaId = $paymentMethod->getMediaId();
+        $fileName = 'card_' . $payrexxPaymentMethodIdentifier;
+        $filePath = \sprintf('%s/%s/%s.svg', \dirname(__DIR__, 2), self::PAYMENT_METHOD_MEDIA_DIR, $fileName);
+        $mediaFile = new MediaFile(
+            $filePath,
+            \mime_content_type($filePath) ?: '',
+            \pathinfo($filePath, \PATHINFO_EXTENSION),
+            \filesize($filePath) ?: 0
+        );
+        $this->payrexxMediaInstaller->persistFileToMedia(
+            $mediaFile,
+            'payrexx_' . $fileName,
+            $mediaId,
+            $context
+        );
     }
 
     /**

@@ -15,6 +15,11 @@ use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use PayrexxPaymentGateway\Installer\Modules\PayrexxMediaInstaller;
+use Shopware\Core\Content\Media\Aggregate\MediaFolder\MediaFolderDefinition;
+use Shopware\Core\Content\Media\File\FileSaver;
+use Shopware\Core\Content\Media\MediaDefinition;
+use Shopware\Core\Content\Media\MediaService;
 
 class PayrexxPaymentInstaller implements InstallerInterface
 {
@@ -67,7 +72,32 @@ class PayrexxPaymentInstaller implements InstallerInterface
         /** @var PluginIdProvider $pluginIdProvider */
         $pluginIdProvider = $this->container->get(PluginIdProvider::class);
 
+        // $payrexxMediaInstaller = $this->container->get('PayrexxPaymentGateway\Installer\Modules\PayrexxMediaInstaller');
 
-        return new PaymentMethodInstaller($entityRepository, $pluginIdProvider);
+        return new PaymentMethodInstaller(
+            $entityRepository,
+            $pluginIdProvider,
+            // new PayrexxMediaInstaller(
+            //     $this->getRepository($this->container, MediaDefinition::ENTITY_NAME),
+            //     $this->getRepository($this->container, MediaFolderDefinition::ENTITY_NAME),
+            //     $this->getRepository($this->container, PaymentMethodDefinition::ENTITY_NAME),
+                $this->container->get(FileSaver::class)
+            // )
+        );
+    }
+
+    private function getRepository(ContainerInterface $container, string $entityName): EntityRepository
+    {
+        $repository = $container->get(\sprintf('%s.repository', $entityName), ContainerInterface::NULL_ON_INVALID_REFERENCE);
+
+        if (\interface_exists(EntityRepositoryInterface::class) && $repository instanceof EntityRepositoryInterface) {
+            return new EntityRepositoryDecorator($repository);
+        }
+
+        if (!$repository instanceof EntityRepository) {
+            throw new ServiceNotFoundException(\sprintf('%s.repository', $entityName));
+        }
+
+        return $repository;
     }
 }
