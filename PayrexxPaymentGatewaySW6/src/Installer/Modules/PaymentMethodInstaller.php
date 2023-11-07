@@ -59,6 +59,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_BOB_INVOICE        = 'bob-invoice';
     public const PAYREXX_CENTI              = 'centi';
     public const PAYREXX_HEIDIPAY           = 'heidipay';
+    public const PAYREXX_REKA               = 'reka';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -449,6 +450,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Heidipay',
+                ],
+            ],
+        ],
+        self::PAYREXX_REKA => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Reka',
+                ],
+                'en-GB' => [
+                    'name' => 'Reka',
                 ],
             ],
         ],
