@@ -60,6 +60,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_CENTI              = 'centi';
     public const PAYREXX_HEIDIPAY           = 'heidipay';
     public const PAYREXX_REKA               = 'reka';
+    public const PAYREXX_BANK_TRANSFER      = 'bank-transfer';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -460,6 +461,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Reka',
+                ],
+            ],
+        ],
+        self::PAYREXX_BANK_TRANSFER => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Kauf auf Rechnung',
+                ],
+                'en-GB' => [
+                    'name' => 'Purchase on invoice',
                 ],
             ],
         ],
