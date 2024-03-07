@@ -54,18 +54,31 @@ class PayrexxApiService
     /**
      * Create a checkout page in Payrexx (Payrexx Gateway)
      *
-     * @param $orderNumber
-     * @param $amount
-     * @param $currency
-     * @param $paymentMean
-     * @param $user
-     * @param $urls
+     * @param string $orderNumber
+     * @param float  $amount
+     * @param float  $averageVatRate,
+     * @param string $currency
+     * @param string $paymentMean
+     * @param array  $customer
+     * @param string $url
+     * @param array  $basket
      * @param string $salesChannelId
+     * @param string $purpose
      * @return Gateway
      *
      */
-    public function createPayrexxGateway(string $orderNumber, float $amount, float $averageVatRate, string $currency, string $paymentMean, array $customer, string $url, array $basket, string $salesChannelId)
-    {
+    public function createPayrexxGateway(
+        string $orderNumber,
+        float $amount,
+        float $averageVatRate,
+        string $currency,
+        string $paymentMean,
+        array $customer,
+        string $url,
+        array $basket,
+        string $salesChannelId,
+        string $purpose
+    ) {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
         $lookAndFeelId = !empty($config['lookFeelID']) ? $config['lookFeelID'] : null;
 
@@ -78,7 +91,6 @@ class PayrexxApiService
         $gateway->setFailedRedirectUrl($url);
         $gateway->setCancelRedirectUrl($url);
         $gateway->setSkipResultPage(true);
-        $gateway->setBasket($basket);
         $gateway->setLookAndFeelProfile($lookAndFeelId);
 
         $gateway->setPsp([]);
@@ -94,6 +106,12 @@ class PayrexxApiService
         $gateway->addField('postcode', $customer['postcode']);
         $gateway->addField('place', $customer['place']);
         $gateway->addField('country', $customer['country']);
+
+        if (!empty($basket)) {
+            $gateway->setBasket($basket);
+        } else {
+            $gateway->setPurpose($purpose);
+        }
 
         try {
             return $payrexx->create($gateway);
