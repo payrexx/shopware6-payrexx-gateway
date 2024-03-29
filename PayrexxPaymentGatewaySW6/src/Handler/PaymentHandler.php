@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PayrexxPaymentGateway\Handler;
 
+use Exception;
 use Payrexx\Models\Response\Transaction;
 use PayrexxPaymentGateway\Service\ConfigService;
 use PayrexxPaymentGateway\Service\PayrexxApiService;
@@ -130,7 +131,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
         $basket = $this->collectBasketData($order, $totalAmount, $salesChannelContext);
-        $averageVatRate = $this->getAverageTaxRate($order);
+                $averageVatRate = $this->getAverageTaxRate($order);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
@@ -161,6 +162,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $salesChannelId
             );
 
+            if (!$payrexxGateway) {
+                throw new Exception('Gateway creation error');
+            }
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
             $this->transactionHandler->handleTransactionStatus(
                 $orderTransaction,
@@ -257,7 +261,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 'amount' => $unitPrice * 100,
                 'sku' => isset($item->getPayload()['productNumber']) ? $item->getPayload()['productNumber'] : '',
             ];
-            $basketTotal += $unitPrice * $quantity;
         }
 
         $shippingMethodRepo = $this->container->get('shipping_method.repository');
@@ -298,12 +301,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                     'quantity' => $quantity,
                     'amount' => $unitPrice * 100,
                 ];
-                $basketTotal += $unitPrice;
             }
-        }
-
-        if ($totalAmount !== $basketTotal) {
-            return [];
         }
 
         return $basket;
