@@ -131,7 +131,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
         $basket = $this->collectBasketData($order, $totalAmount, $salesChannelContext);
-                $averageVatRate = $this->getAverageTaxRate($order);
+        $averageVatRate = $this->getAverageTaxRate($order);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
@@ -261,6 +261,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 'amount' => $unitPrice * 100,
                 'sku' => isset($item->getPayload()['productNumber']) ? $item->getPayload()['productNumber'] : '',
             ];
+            $basketTotal += $unitPrice * $quantity;
         }
 
         $shippingMethodRepo = $this->container->get('shipping_method.repository');
@@ -301,7 +302,12 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                     'quantity' => $quantity,
                     'amount' => $unitPrice * 100,
                 ];
+                $basketTotal += $unitPrice;
             }
+        }
+
+        if ($totalAmount !== $basketTotal) {
+            return [];
         }
 
         return $basket;
