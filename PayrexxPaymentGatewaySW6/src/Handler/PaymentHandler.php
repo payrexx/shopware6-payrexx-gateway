@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PayrexxPaymentGateway\Handler;
 
+use Exception;
 use Payrexx\Models\Response\Transaction;
 use PayrexxPaymentGateway\Service\ConfigService;
 use PayrexxPaymentGateway\Service\PayrexxApiService;
@@ -168,6 +169,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $purpose
             );
 
+            if (!$payrexxGateway) {
+                throw new Exception('Gateway creation error');
+            }
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
             $this->transactionHandler->handleTransactionStatus(
                 $orderTransaction,
