@@ -111,6 +111,13 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $orderTransaction = $transaction->getOrderTransaction();
         $order = $transaction->getOrder();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
+
+        // Workaround if amount is 0
+        if ($totalAmount <= 0) {
+            $redirectUrl = $transaction->getReturnUrl();
+            return new RedirectResponse($redirectUrl);
+        }
+
         $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
         $transactionId = $orderTransaction->getId();
 
@@ -129,15 +136,14 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
-        $basket = $this->collectBasketData($order, $totalAmount, $salesChannelContext);
-        $averageVatRate = $this->getAverageTaxRate($order);
-
-        // Workaround if amount is 0
-        if ($totalAmount <= 0) {
-            $redirectUrl = $transaction->getReturnUrl();
-            return new RedirectResponse($redirectUrl);
+        $basket = $this->collectBasketData($order, $salesChannelContext);
+        $purpose = $this->createPurposeByBasket($basket);
+        $basketAmount = $this->getBasketAmount($basket);
+        if ($totalAmount !== $basketAmount) {
+            $basket = [];
         }
 
+        $averageVatRate = $this->getAverageTaxRate($order);
         try {
             $customer = $this->customerService->getCustomerDetails($order, Context::createDefaultContext());
         } catch (\Exception $e) {
@@ -158,7 +164,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $customer,
                 $transaction->getReturnUrl(),
                 $basket,
-                $salesChannelId
+                $salesChannelId,
+                $purpose
             );
 
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
@@ -236,10 +243,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         );
     }
 
-    private function collectBasketData(OrderEntity $order, $totalAmount, $salesChannelContext):array
+    private function collectBasketData(OrderEntity $order, $salesChannelContext):array
     {
         // Collect basket data
-        $basketTotal = 0;
         $basket = [];
 
         $lineItemElements = [];
@@ -257,7 +263,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 'amount' => $unitPrice * 100,
                 'sku' => isset($item->getPayload()['productNumber']) ? $item->getPayload()['productNumber'] : '',
             ];
-            $basketTotal += $unitPrice * $quantity;
         }
 
         $shippingMethodRepo = $this->container->get('shipping_method.repository');
@@ -282,7 +287,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 'amount' => $unitPrice * 100,
                 'sku' => $shippingMethod->getId(),
             ];
-            $basketTotal += $unitPrice * $quantity;
         }
 
         $taxElements = [];
@@ -298,12 +302,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                     'quantity' => $quantity,
                     'amount' => $unitPrice * 100,
                 ];
-                $basketTotal += $unitPrice;
             }
-        }
-
-        if ($totalAmount !== $basketTotal) {
-            return [];
         }
 
         return $basket;
@@ -326,5 +325,42 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $finalTaxRate = ($taxRate / count($taxElements));
 
         return $finalTaxRate;
+    }
+
+    /**
+     * Get total amount of basket items
+     *
+     * @param $basket
+     * @return float
+     */
+    private function getBasketAmount($basket): float
+    {
+        $basketAmount = 0;
+
+        foreach ($basket as $product) {
+            $amount = $product['amount'] / 100;
+            $basketAmount += $product['quantity'] * $amount;
+        }
+        return floatval($basketAmount);
+    }
+
+    /**
+     * Create purpose from basket items
+     *
+     * @param array $basket
+     * @return string
+     */
+    public static function createPurposeByBasket($basket): string
+    {
+        $desc = [];
+        foreach ($basket as $product) {
+            $desc[] = implode(' ', [
+                $product['name'],
+                $product['quantity'],
+                'x',
+                number_format($product['amount'] / 100, 2, '.'),
+            ]);
+        }
+        return implode('; ', $desc);
     }
 }
