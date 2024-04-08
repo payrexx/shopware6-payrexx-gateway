@@ -44,10 +44,5 @@
       "de-CH": "https://support.payrexx.com/de/"
 
     }
-  },
-  "config": {
-    "allow-plugins": {
-      "symfony/runtime": false
-    }
   }
 }
