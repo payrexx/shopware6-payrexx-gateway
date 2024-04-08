@@ -10,7 +10,7 @@
     </template>
     {% endblock %}
     {% block payrexx_payment_actions %}
-    <template slot="smart-bar-actions">
+    <template #smart-bar-actions>
         {% block payrexx_payment_settings_actions_feedback %}
         <sw-button
             @click="isSupportModalOpen = true"
@@ -34,7 +34,7 @@
 
         {% block payrexx_payment_settings_actions_save %}
         <sw-button-process
-            class="sw-settings-login-registration__save-action"
+            class="payrexx_payment_settings_actions__save-action"
             :isLoading="isLoading"
             :processSuccess="isSaveSuccessful"
             :disabled="isLoading || isTesting"
@@ -94,20 +94,13 @@
         <sw-card-view>
             <sw-system-config
                 ref="systemConfig"
-                salesChannelSwitchable
+                sales-channel-switchable
                 inherit
                 @config-changed="onConfigChange"
                 domain="PayrexxPaymentGatewaySW6.settings">
-                <template #card-element="{ element, config }">
-                    <sw-form-field-renderer
-                        v-else
-                        v-bind="getBind(element, config)"
-                        v-model="config[element.name]"/>
-                </template>
             </sw-system-config>
         </sw-card-view>
     </template>
     {% endblock %}
 </sw-page>
 {% endblock %}
-

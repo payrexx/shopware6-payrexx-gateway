@@ -16,7 +16,7 @@ Module.register('payrexx-payment', {
     description: 'payrexx-payment.module.description',
     version: '1.0.0',
     targetVersion: '1.0.0',
-    icon: 'default-action-settings',
+    icon: 'regular-cog',
 
     snippets: {
         'de-DE': deDE,
@@ -37,7 +37,8 @@ Module.register('payrexx-payment', {
         name: 'payrexx-payment-settings',
         group: 'plugins',
         to: 'payrexx.payment.index',
-        iconComponent: 'payrexx-payment-settings-icon',
+        // iconComponent: 'payrexx-payment-settings-icon',
+        icon: 'regular-credit-card',
         backgroundEnabled: true,
     }
 });

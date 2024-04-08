@@ -41,6 +41,9 @@
         <service id="PayrexxPaymentGateway\Controller\SettingsController">
             <argument type="service" id="service_container" />
             <argument type="service" id="monolog.logger"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
         </service>
 
         <service id="PayrexxPaymentGateway\CookieProvider\CookieProvider" decorates="Shopware\Storefront\Framework\Cookie\CookieProviderInterface">

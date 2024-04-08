@@ -32,6 +32,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route(defaults={"_routeScope"={"storefront"}})
  */
+#[Route(defaults: ['_routeScope' => ['storefront']])]
 class Dispatcher
 {
 
@@ -102,6 +103,7 @@ class Dispatcher
      * @param Context $context
      * @return Response
      */
+    #[Route(path: '/payrexx-payment/webhook', name: 'frontend.payrexx-payment.webhook', methods: ['POST'], defaults: ['csrf_protected' => false])]
     public function executeWebhook(Request $request, Context $context): Response
     {
         $content = json_decode($request->getContent());
