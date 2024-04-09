@@ -572,6 +572,7 @@ class PaymentMethodInstaller implements InstallerInterface
             'translations' => $payrexxPaymentMethod['translations'],
             'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
+            'technicalName' => 'payrexx_payment' . $payrexxPaymentMethodIdentifier,
             'customFields' => [
                 'payrexx_payment_method_name' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
             ]

@@ -26,9 +26,9 @@ use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
-use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymentException;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
+use Shopware\Core\Checkout\Payment\PaymentException;
 
 class PaymentHandler implements AsynchronousPaymentHandlerInterface
 {
@@ -148,7 +148,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         try {
             $customer = $this->customerService->getCustomerDetails($order, Context::createDefaultContext());
         } catch (\Exception $e) {
-            throw new AsyncPaymentProcessException(
+            throw PaymentException::asyncProcessInterrupted(
                 $transactionId,
                 'An error occurred while processing the customer details' . PHP_EOL . $e->getMessage()
             );
@@ -180,7 +180,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             );
             $redirectUrl = $payrexxGateway->getLink();
         } catch (\Exception $e) {
-            throw new AsyncPaymentProcessException(
+            throw PaymentException::asyncProcessInterrupted(
                 $transactionId,
                 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage()
             );
@@ -193,7 +193,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param AsyncPaymentTransactionStruct $transaction
      * @param Request $request
      * @param SalesChannelContext $salesChannelContext
-     * @throws CustomerCanceledAsyncPaymentException
+     * @throws PaymentException
      */
     public function finalize(AsyncPaymentTransactionStruct $shopwareTransaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
@@ -212,7 +212,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         if (empty($gatewayId)) {
-            throw new CustomerCanceledAsyncPaymentException(
+            throw PaymentException::customerCanceled(
                 $transactionId,
                 'Customer canceled the payment on the Payrexx page'
             );
@@ -222,7 +222,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelContext->getSalesChannel()->getId());
 
         if (!$payrexxTransaction && $totalAmount > 0) {
-            throw new CustomerCanceledAsyncPaymentException(
+            throw PaymentException::customerCanceled(
                 $transactionId,
                 'Customer canceled the payment on the Payrexx page'
             );
@@ -241,7 +241,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::DECLINED, Transaction::EXPIRED, Transaction::ERROR])){
             return;
         }
-        throw new CustomerCanceledAsyncPaymentException(
+        throw PaymentException::customerCanceled(
             $transactionId,
             'Customer canceled the payment on the Payrexx page'
         );
