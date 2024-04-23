@@ -18,6 +18,8 @@ use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
 use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class PayrexxPaymentGatewaySW6 extends Plugin
 {
@@ -65,5 +67,33 @@ class PayrexxPaymentGatewaySW6 extends Plugin
     {
         (new PayrexxPaymentInstaller($this->container))->update($context);
         parent::update($context);
+    }
+
+    /**
+     * @param RoutingConfigurator $routes
+     * @param string $environment
+     * @return void
+     */
+    public function configureRoutes(RoutingConfigurator $routes, string $environment): void
+    {
+        if (!$this->isActive()) {
+            return;
+        }
+
+        /** @var string $version */
+        $version = $this->container->getParameter('kernel.shopware_version');
+
+        $pos = strpos($version, '6.4');
+        $routeDir =  $this->getPath() . '/Resources/config/compatibility/routes/';
+        if ($pos !== false) {
+            $routeFile = $routeDir . 'routes_64.xml';
+        } else {
+            $routeFile = $routeDir . 'routes_6.xml';
+        }
+        $fileSystem = new Filesystem();
+
+        if ($fileSystem->exists($routeFile)) {
+            $routes->import($routeFile);
+        }
     }
 }
