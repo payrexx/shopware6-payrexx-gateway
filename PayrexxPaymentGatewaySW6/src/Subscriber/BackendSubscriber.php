@@ -83,8 +83,11 @@ class BackendSubscriber implements EventSubscriberInterface
 
             $transaction = $order->getTransactions()->first();
 
+            if (!$transaction) {
+                continue;
+            }
             $transactionCustomFields = $transaction->getCustomFields();
-            if (!$transaction || !$transactionCustomFields || !$transactionCustomFields['gateway_id']) {
+            if (empty($transactionCustomFields['gateway_id'])) {
                 continue;
             }
 
