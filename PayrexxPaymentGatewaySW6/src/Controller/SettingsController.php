@@ -19,12 +19,13 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * @Route(defaults={"_routeScope"={"api"}})
  */
+#[Route(defaults: ['_routeScope' => ['api']])]
 class SettingsController extends AbstractController
 {
     /**
      * @var ContainerInterface
      */
-    protected $container;
+    protected $containerInterface;
 
     /**
      * @var LoggerInterface
@@ -32,14 +33,13 @@ class SettingsController extends AbstractController
     protected $logger;
 
     /**
-     * @param ContainerInterface $container
      * @param LoggerInterface $logger
      **/
     public function __construct(
-        ContainerInterface $container,
+        ContainerInterface $containerInterface,
         LoggerInterface $logger
     ) {
-        $this->container = $container;
+        $this->containerInterface = $containerInterface;
         $this->logger = $logger;
     }
 
@@ -47,6 +47,7 @@ class SettingsController extends AbstractController
      * @Route("/api/_action/payrexx_payment/validate-api-credentials", name="api.action.payrexx_payment.validate.api.credentials", methods={"POST"})
      * @throws \Payrexx\PayrexxException
      */
+    #[Route(path: '/api/_action/payrexx_payment/validate-api-credentials', name: 'api.action.payrexx_payment.validate.api.credentials', methods: ['POST'])]
     public function validateApiCredentials(Request $request, Context $context): JsonResponse
     {
         require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';
