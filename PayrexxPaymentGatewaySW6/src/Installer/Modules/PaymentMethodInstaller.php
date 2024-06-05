@@ -539,6 +539,11 @@ class PaymentMethodInstaller implements InstallerInterface
         foreach (self::PAYMENT_METHODS as $payrexxPaymentMethodIdentifier => $payrexxPaymentMethod) {
             $this->upsertPaymentMethod($context->getContext(), $payrexxPaymentMethod, $payrexxPaymentMethodIdentifier);
         }
+
+        $unAvailablePaymentMethods = ['sofortueberweisung_de'];
+        foreach ($unAvailablePaymentMethods as $payrexxPaymentMethodIdentifier) {
+            $this->upsertPaymentMethod($context->getContext(), [], $payrexxPaymentMethodIdentifier);
+        }
     }
 
     /**
@@ -563,6 +568,11 @@ class PaymentMethodInstaller implements InstallerInterface
             $paymentMethod = $paymentMethods->getEntities()->first();
             $paymentMethodId = $paymentMethod->getId();
             $paymentMethodActive = $paymentMethod->getActive();
+        }
+
+        if ($paymentMethodId && $payrexxPaymentMethodIdentifier == 'sofortueberweisung_de') {
+            $this->setPaymentMethodIsActive($context, $paymentMethodId, false);
+            return;
         }
 
         $options = [
@@ -593,7 +603,8 @@ class PaymentMethodInstaller implements InstallerInterface
      * @param boolean $active
      * @return void
      */
-    private function setPaymentMethodIsActive($context, $paymentMethodId, $active) {
+    private function setPaymentMethodIsActive($context, $paymentMethodId, $active)
+    {
         $paymentMethod = [
             'id' => $paymentMethodId,
             'active' => $active,
