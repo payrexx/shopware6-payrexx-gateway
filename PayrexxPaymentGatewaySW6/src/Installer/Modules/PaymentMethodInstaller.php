@@ -30,7 +30,6 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_WIR                = 'wirpay';
     public const PAYREXX_PAYPAL             = 'paypal';
     public const PAYREXX_BITCOIN            = 'bitcoin';
-    public const PAYREXX_SOFORT             = 'sofortueberweisung_de';
     public const PAYREXX_AIRPLUS            = 'airplus';
     public const PAYREXX_BILLPAY            = 'billpay';
     public const PAYREXX_BONUSCARD          = 'bonuscard';
@@ -61,6 +60,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_HEIDIPAY           = 'heidipay';
     public const PAYREXX_REKA               = 'reka';
     public const PAYREXX_BANK_TRANSFER      = 'bank-transfer';
+    public const PAYREXX_KLARNA             = 'klarna';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -161,16 +161,6 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Bitcoin',
-                ],
-            ],
-        ],
-        self::PAYREXX_SOFORT => [
-            'translations' => [
-                'de-DE' => [
-                    'name' => 'Sofortüberweisung',
-                ],
-                'en-GB' => [
-                    'name' => 'Sofortüberweisung',
                 ],
             ],
         ],
@@ -474,6 +464,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
             ],
         ],
+        self::PAYREXX_KLARNA => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Klarna',
+                ],
+                'en-GB' => [
+                    'name' => 'Klarna',
+                ],
+            ],
+        ],
         self::PAYREXX_NO_PM => [
             'translations' => [
                 'de-DE' => [
@@ -539,6 +539,11 @@ class PaymentMethodInstaller implements InstallerInterface
         foreach (self::PAYMENT_METHODS as $payrexxPaymentMethodIdentifier => $payrexxPaymentMethod) {
             $this->upsertPaymentMethod($context->getContext(), $payrexxPaymentMethod, $payrexxPaymentMethodIdentifier);
         }
+
+        $unAvailablePaymentMethods = ['sofortueberweisung_de'];
+        foreach ($unAvailablePaymentMethods as $payrexxPaymentMethodIdentifier) {
+            $this->upsertPaymentMethod($context->getContext(), [], $payrexxPaymentMethodIdentifier);
+        }
     }
 
     /**
@@ -563,6 +568,11 @@ class PaymentMethodInstaller implements InstallerInterface
             $paymentMethod = $paymentMethods->getEntities()->first();
             $paymentMethodId = $paymentMethod->getId();
             $paymentMethodActive = $paymentMethod->getActive();
+        }
+
+        if ($paymentMethodId && $payrexxPaymentMethodIdentifier == 'sofortueberweisung_de') {
+            $this->setPaymentMethodIsActive($context, $paymentMethodId, false);
+            return;
         }
 
         $options = [
@@ -593,7 +603,8 @@ class PaymentMethodInstaller implements InstallerInterface
      * @param boolean $active
      * @return void
      */
-    private function setPaymentMethodIsActive($context, $paymentMethodId, $active) {
+    private function setPaymentMethodIsActive($context, $paymentMethodId, $active)
+    {
         $paymentMethod = [
             'id' => $paymentMethodId,
             'active' => $active,
