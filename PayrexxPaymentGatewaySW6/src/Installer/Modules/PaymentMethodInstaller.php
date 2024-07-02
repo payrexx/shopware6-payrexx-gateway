@@ -61,6 +61,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_REKA               = 'reka';
     public const PAYREXX_BANK_TRANSFER      = 'bank-transfer';
     public const PAYREXX_KLARNA             = 'klarna';
+    public const PAYREXX_POSTFINANCE_PAY    = 'post-finance-pay';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -474,6 +475,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
             ],
         ],
+        self::PAYREXX_POSTFINANCE_PAY => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'PostFinance Pay',
+                ],
+                'en-GB' => [
+                    'name' => 'PostFinance Pay',
+                ],
+            ],
+        ],
         self::PAYREXX_NO_PM => [
             'translations' => [
                 'de-DE' => [
@@ -582,7 +593,7 @@ class PaymentMethodInstaller implements InstallerInterface
             'translations' => $payrexxPaymentMethod['translations'],
             'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
-            'technicalName' => 'payrexx_payment' . $payrexxPaymentMethodIdentifier,
+            'technicalName' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
             'customFields' => [
                 'payrexx_payment_method_name' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
             ]
