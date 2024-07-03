@@ -82,10 +82,9 @@ class PayrexxPaymentGatewaySW6 extends Plugin
 
         /** @var string $version */
         $version = $this->container->getParameter('kernel.shopware_version');
-
-        $pos = strpos($version, '6.4');
         $routeDir =  $this->getPath() . '/Resources/config/compatibility/routes/';
-        if ($pos !== false) {
+
+        if (version_compare($version, '6.4', '>=') && version_compare($version, '6.5', '<')) {
             $routeFile = $routeDir . 'routes_64.xml';
         } else {
             $routeFile = $routeDir . 'routes_6.xml';
