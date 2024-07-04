@@ -153,6 +153,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $this->customAsyncException($transactionId, $message);
         }
 
+        if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
+            throw new Exception('Unavailable payment method error');
+        }
         // Create Payrexx Gateway link for checkout and redirect user
         try {
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
@@ -366,7 +369,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if (class_exists(AsyncPaymentProcessException::class)) {
             throw new AsyncPaymentProcessException($transactionId, $message);
         } else {
-            // support from shopware 6.6 
+            // support from shopware 6.6
             throw PaymentException::asyncProcessInterrupted($transactionId, $message);
         }
     }
@@ -376,7 +379,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param string $message
      * @throws AsyncPaymentProcessException|PaymentException
      */
-    public function customCustomerException($transactionId, $message) 
+    public function customCustomerException($transactionId, $message)
     {
         if (class_exists(CustomerCanceledAsyncPaymentException::class)) {
             throw new CustomerCanceledAsyncPaymentException($transactionId, $message);

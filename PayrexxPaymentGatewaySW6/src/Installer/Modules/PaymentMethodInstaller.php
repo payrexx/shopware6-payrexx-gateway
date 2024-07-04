@@ -564,11 +564,13 @@ class PaymentMethodInstaller implements InstallerInterface
         }
 
         // TO DO: Remove later releases.
-        if ($paymentMethodId && in_array($payrexxPaymentMethodIdentifier, [
+        if ($paymentMethodId &&
+            in_array($payrexxPaymentMethodIdentifier, [
                 'sofortueberweisung_de',
                 'postfinance_card',
                 'postfinance_efinance',
-            ])) {
+            ])
+        ) {
             $this->setPaymentMethodIsActive($context, $paymentMethodId, false);
             return;
         }
