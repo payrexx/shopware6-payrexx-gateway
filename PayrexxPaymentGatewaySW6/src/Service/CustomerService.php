@@ -13,12 +13,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 class CustomerService
 {
     /**
-     * @var EntityRepository 
+     * @var EntityRepository
      */
     protected $addressRepository;
 
     /**
-     * @var LoggerInterface 
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -55,7 +55,12 @@ class CustomerService
         }
 
         $customer = $order->getOrderCustomer();
-        
+
+        $delivery = $order->getDeliveries()?->first();
+        if ($delivery) {
+            $shippingAddress = $delivery->getShippingOrderAddress();
+        }
+
         return [
             'forename' => $address->getFirstName(),
             'surname' => $address->getLastName(),
@@ -65,6 +70,13 @@ class CustomerService
             'place' => $address->getCity(),
             'email' => $customer->getEmail(),
             'country' => $address->getCountry()->getIso(),
+            'delivery_forename' => $shippingAddress->getFirstName() ?? $address->getFirstName(),
+            'delivery_surname' => $shippingAddress->getLastName() ?? $address->getLastName(),
+            'delivery_company' => $shippingAddress->getCompany() ?? $address->getCompany(),
+            'delivery_street' => $shippingAddress->getStreet() ?? $address->getStreet(),
+            'delivery_postcode' => $shippingAddress->getZipCode() ?? $address->getZipCode(),
+            'delivery_place' => $shippingAddress->getCity() ?? $address->getCity(),
+            'delivery_country' => $shippingAddress->getCountry()->getIso() ?? $address->getCountry()->getIso(),
         ];
     }
 }

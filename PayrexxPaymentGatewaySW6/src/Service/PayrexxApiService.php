@@ -107,6 +107,14 @@ class PayrexxApiService
         $gateway->addField('place', $customer['place']);
         $gateway->addField('country', $customer['country']);
 
+        $gateway->addField('delivery_forename', $customer['delivery_forename']);
+        $gateway->addField('delivery_surname', $customer['delivery_surname']);
+        $gateway->addField('delivery_company', $customer['delivery_company']);
+        $gateway->addField('delivery_street', $customer['delivery_street']);
+        $gateway->addField('delivery_postcode', $customer['delivery_postcode']);
+        $gateway->addField('delivery_place', $customer['delivery_place']);
+        $gateway->addField('delivery_country', $customer['delivery_country']);
+
         if (!empty($basket)) {
             $gateway->setBasket($basket);
         } else {
