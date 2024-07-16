@@ -43,8 +43,6 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_INVOICE            = 'invoice';
     public const PAYREXX_MYONE              = 'myone';
     public const PAYREXX_PAYSAFECARD        = 'paysafecard';
-    public const PAYREXX_PF_CARD            = 'postfinance_card';
-    public const PAYREXX_PF_EFINANCE        = 'postfinance_efinance';
     public const PAYREXX_SWISSBILLING       = 'swissbilling';
     public const PAYREXX_TWINT              = 'twint';
     public const PAYREXX_VIACASH            = 'barzahlen';
@@ -61,6 +59,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_REKA               = 'reka';
     public const PAYREXX_BANK_TRANSFER      = 'bank-transfer';
     public const PAYREXX_KLARNA             = 'klarna';
+    public const PAYREXX_POSTFINANCE_PAY    = 'post-finance-pay';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -294,26 +293,6 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
             ],
         ],
-        self::PAYREXX_PF_CARD => [
-            'translations' => [
-                'de-DE' => [
-                    'name' => 'PostFinance Card',
-                ],
-                'en-GB' => [
-                    'name' => 'PostFinance Card',
-                ],
-            ],
-        ],
-        self::PAYREXX_PF_EFINANCE => [
-            'translations' => [
-                'de-DE' => [
-                    'name' => 'PostFinance E-Finance',
-                ],
-                'en-GB' => [
-                    'name' => 'PostFinance E-Finance',
-                ],
-            ],
-        ],
         self::PAYREXX_SWISSBILLING => [
             'translations' => [
                 'de-DE' => [
@@ -474,6 +453,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
             ],
         ],
+        self::PAYREXX_POSTFINANCE_PAY => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'PostFinance Pay',
+                ],
+                'en-GB' => [
+                    'name' => 'PostFinance Pay',
+                ],
+            ],
+        ],
         self::PAYREXX_NO_PM => [
             'translations' => [
                 'de-DE' => [
@@ -540,7 +529,11 @@ class PaymentMethodInstaller implements InstallerInterface
             $this->upsertPaymentMethod($context->getContext(), $payrexxPaymentMethod, $payrexxPaymentMethodIdentifier);
         }
 
-        $unAvailablePaymentMethods = ['sofortueberweisung_de'];
+        $unAvailablePaymentMethods = [
+            'sofortueberweisung_de',
+            'postfinance_card',
+            'postfinance_efinance',
+        ];
         foreach ($unAvailablePaymentMethods as $payrexxPaymentMethodIdentifier) {
             $this->upsertPaymentMethod($context->getContext(), [], $payrexxPaymentMethodIdentifier);
         }
@@ -570,9 +563,27 @@ class PaymentMethodInstaller implements InstallerInterface
             $paymentMethodActive = $paymentMethod->getActive();
         }
 
-        if ($paymentMethodId && $payrexxPaymentMethodIdentifier == 'sofortueberweisung_de') {
+        // TO DO: Remove later releases.
+        if ($paymentMethodId &&
+            in_array($payrexxPaymentMethodIdentifier, [
+                'sofortueberweisung_de',
+                'postfinance_card',
+                'postfinance_efinance',
+            ])
+        ) {
             $this->setPaymentMethodIsActive($context, $paymentMethodId, false);
             return;
+        }
+
+        // TO DO: Remove later releases.
+        if (!$paymentMethodId && $payrexxPaymentMethodIdentifier == 'post-finance-pay') {
+            $paymentMethodActive = false;
+            foreach(['postfinance_card', 'postfinance_efinance'] as $paymentMethod) {
+                if ($this->IsPaymentMethodActive($paymentMethod)) {
+                    $paymentMethodActive = true;
+                    break;
+                }
+            }
         }
 
         $options = [
@@ -582,7 +593,7 @@ class PaymentMethodInstaller implements InstallerInterface
             'translations' => $payrexxPaymentMethod['translations'],
             'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
-            'technicalName' => 'payrexx_payment' . $payrexxPaymentMethodIdentifier,
+            'technicalName' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
             'customFields' => [
                 'payrexx_payment_method_name' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
             ]
@@ -610,5 +621,20 @@ class PaymentMethodInstaller implements InstallerInterface
             'active' => $active,
         ];
         $this->paymentMethodRepository->update([$paymentMethod], $context);
+    }
+
+    private function IsPaymentMethodActive(string $payrexxPaymentMethodIdentifier): bool
+    {
+        $criteria = (new Criteria())
+            ->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class))
+            ->addFilter(new EqualsFilter('customFields.payrexx_payment_method_name', PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier))
+            ->setLimit(1);
+        $paymentMethods = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
+
+        if ($paymentMethods->count()){
+            $paymentMethod = $paymentMethods->getEntities()->first();
+            return $paymentMethod->getActive();
+        }
+        return false;
     }
 }
