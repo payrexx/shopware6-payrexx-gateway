@@ -215,7 +215,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }
 
-        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway($gatewayId, $salesChannelContext->getSalesChannel()->getId());
+        $gatewayIds = explode(',', (string) $gatewayId);
+        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway(current($gatewayIds), $salesChannelContext->getSalesChannel()->getId());
         $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelContext->getSalesChannel()->getId());
 
         if (!$payrexxTransaction && $totalAmount > 0) {
