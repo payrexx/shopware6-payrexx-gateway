@@ -142,7 +142,7 @@ class Dispatcher
 
             $transaction = false;
             foreach($order->getTransactions() as $orderTransaction) {
-                $savedGatewayIds = explode(',', $orderTransaction->getCustomFields()['gateway_id']);
+                $savedGatewayIds = explode(',', (string) $orderTransaction->getCustomFields()['gateway_id']);
                 if (in_array($requestGatewayId, $savedGatewayIds)) {
                     $transaction = $orderTransaction;
                     break;

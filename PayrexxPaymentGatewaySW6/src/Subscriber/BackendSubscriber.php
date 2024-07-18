@@ -91,7 +91,7 @@ class BackendSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            $gatewayIds = explode(',', $transactionCustomFields['gateway_id']);
+            $gatewayIds = explode(',', (string) $transactionCustomFields['gateway_id']);
             if (!$payrexxGateway = $this->payrexxApiService->getPayrexxGateway(current($gatewayIds), $salesChannelId)) {
                 continue;
             }
