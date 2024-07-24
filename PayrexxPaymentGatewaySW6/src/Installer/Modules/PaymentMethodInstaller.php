@@ -589,8 +589,6 @@ class PaymentMethodInstaller implements InstallerInterface
         $options = [
             'id' => $paymentMethodId,
             'handlerIdentifier' => PaymentHandler::class,
-            'name' => $payrexxPaymentMethod['translations']['en-GB']['name'],
-            'translations' => $payrexxPaymentMethod['translations'],
             'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
             'technicalName' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
@@ -601,6 +599,8 @@ class PaymentMethodInstaller implements InstallerInterface
 
         if (!$paymentMethodId) {
             $options['afterOrderEnabled'] = true;
+            $options['name'] = $payrexxPaymentMethod['translations']['en-GB']['name'];
+            $options['translations'] = $payrexxPaymentMethod['translations'];
         }
 
         $context->scope(Context::SYSTEM_SCOPE, function (Context $context) use ($options): void {
