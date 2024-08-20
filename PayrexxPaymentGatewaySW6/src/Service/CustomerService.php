@@ -56,6 +56,7 @@ class CustomerService
 
         $customer = $order->getOrderCustomer();
 
+        $shippingAddress = null;
         $delivery = $order->getDeliveries()?->first();
         if ($delivery) {
             $shippingAddress = $delivery->getShippingOrderAddress();
@@ -71,6 +72,7 @@ class CustomerService
             'email' => $customer->getEmail(),
             'country' => $address->getCountry()->getIso()
         ];
+
         $shippingDetails = [];
         if ($shippingAddress) {
             $shippingDetails = [
