@@ -35,13 +35,13 @@ class CustomerService
     }
 
     /**
-     * Returns the customer details
+     * Returns the billing and shipping details
      *
      * @param OrderEntity $order
      * @param Context $context
      * @return array
      */
-    public function getCustomerDetails(OrderEntity $order, Context $context): array
+    public function getBillingAndShippingDetails(OrderEntity $order, Context $context): array
     {
         try {
             $criteria = new Criteria();
@@ -61,7 +61,7 @@ class CustomerService
             $shippingAddress = $delivery->getShippingOrderAddress();
         }
 
-        return [
+        $billingDetails = [
             'forename' => $address->getFirstName(),
             'surname' => $address->getLastName(),
             'company' => $address->getCompany(),
@@ -69,14 +69,23 @@ class CustomerService
             'postcode' => $address->getZipCode(),
             'place' => $address->getCity(),
             'email' => $customer->getEmail(),
-            'country' => $address->getCountry()->getIso(),
-            'delivery_forename' => $shippingAddress->getFirstName() ?? $address->getFirstName(),
-            'delivery_surname' => $shippingAddress->getLastName() ?? $address->getLastName(),
-            'delivery_company' => $shippingAddress->getCompany() ?? $address->getCompany(),
-            'delivery_street' => $shippingAddress->getStreet() ?? $address->getStreet(),
-            'delivery_postcode' => $shippingAddress->getZipCode() ?? $address->getZipCode(),
-            'delivery_place' => $shippingAddress->getCity() ?? $address->getCity(),
-            'delivery_country' => $shippingAddress->getCountry()->getIso() ?? $address->getCountry()->getIso(),
+            'country' => $address->getCountry()->getIso()
         ];
+        $shippingDetails = [];
+        if ($shippingAddress) {
+            $shippingDetails = [
+                'delivery_forename' => $shippingAddress->getFirstName() ?? $address->getFirstName(),
+                'delivery_surname' => $shippingAddress->getLastName() ?? $address->getLastName(),
+                'delivery_company' => $shippingAddress->getCompany() ?? $address->getCompany(),
+                'delivery_street' => $shippingAddress->getStreet() ?? $address->getStreet(),
+                'delivery_postcode' => $shippingAddress->getZipCode() ?? $address->getZipCode(),
+                'delivery_place' => $shippingAddress->getCity() ?? $address->getCity(),
+                'delivery_country' => $shippingAddress->getCountry()->getIso() ?? $address->getCountry()->getIso(),
+            ];
+        }
+
+        $details = array_merge($billingDetails, $shippingDetails);
+
+        return $details;
     }
 }
