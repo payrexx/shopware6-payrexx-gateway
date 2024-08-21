@@ -147,7 +147,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         $averageVatRate = $this->getAverageTaxRate($order);
         try {
-            $customer = $this->customerService->getCustomerDetails($order, Context::createDefaultContext());
+            $billingAndShippingDetails = $this->customerService->getBillingAndShippingDetails($order, Context::createDefaultContext());
         } catch (\Exception $e) {
             $message = 'An error occurred while processing the customer details' . PHP_EOL . $e->getMessage();
             $this->customAsyncException($transactionId, $message);
@@ -164,7 +164,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $averageVatRate,
                 $salesChannelContext->getCurrency()->getIsoCode(),
                 $paymentMean,
-                $customer,
+                $billingAndShippingDetails,
                 $transaction->getReturnUrl(),
                 $basket,
                 $salesChannelId,

@@ -59,7 +59,7 @@ class PayrexxApiService
      * @param float  $averageVatRate,
      * @param string $currency
      * @param string $paymentMean
-     * @param array  $customer
+     * @param array  $billingAndShippingDetails
      * @param string $url
      * @param array  $basket
      * @param string $salesChannelId
@@ -73,7 +73,7 @@ class PayrexxApiService
         float $averageVatRate,
         string $currency,
         string $paymentMean,
-        array $customer,
+        array $billingAndShippingDetails,
         string $url,
         array $basket,
         string $salesChannelId,
@@ -98,22 +98,9 @@ class PayrexxApiService
         $gateway->setReferenceId($orderNumber);
         $gateway->setValidity(15);
 
-        $gateway->addField('forename', $customer['forename']);
-        $gateway->addField('surname', $customer['surname']);
-        $gateway->addField('email', $customer['email']);
-        $gateway->addField('company', $customer['company']);
-        $gateway->addField('street', $customer['street']);
-        $gateway->addField('postcode', $customer['postcode']);
-        $gateway->addField('place', $customer['place']);
-        $gateway->addField('country', $customer['country']);
-
-        $gateway->addField('delivery_forename', $customer['delivery_forename']);
-        $gateway->addField('delivery_surname', $customer['delivery_surname']);
-        $gateway->addField('delivery_company', $customer['delivery_company']);
-        $gateway->addField('delivery_street', $customer['delivery_street']);
-        $gateway->addField('delivery_postcode', $customer['delivery_postcode']);
-        $gateway->addField('delivery_place', $customer['delivery_place']);
-        $gateway->addField('delivery_country', $customer['delivery_country']);
+        foreach ($billingAndShippingDetails as $fieldKey => $fieldValue) {
+            $gateway->addField($fieldKey, $fieldValue);
+        }
 
         if (!empty($basket)) {
             $gateway->setBasket($basket);
