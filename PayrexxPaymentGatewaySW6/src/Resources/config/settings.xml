@@ -43,6 +43,10 @@
                     <id>zahls.ch</id>
                     <name>Zahls.ch</name>
                 </option>
+                <option>
+                    <id>paydirect.ch</id>
+                    <name>Paydirect</name>
+                </option>
             </options>
         </input-field>
         <input-field type="text">
