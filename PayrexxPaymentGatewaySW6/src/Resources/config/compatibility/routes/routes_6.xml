@@ -5,4 +5,5 @@
 
     <import resource="../../../../Controller/**/*Controller.php" type="attribute"/>
     <import resource="../../../../Webhook/**/Dispatcher.php" type="attribute"/>
+    <import resource="../../../../Webhook/**/Cancel.php" type="attribute"/>
 </routes>

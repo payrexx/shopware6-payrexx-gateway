@@ -30,6 +30,8 @@ use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymentExcepti
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
 use Shopware\Core\Checkout\Payment\PaymentException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 class PaymentHandler implements AsynchronousPaymentHandlerInterface
 {
@@ -73,13 +75,19 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     protected $logger;
 
     /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
      * @param OrderTransactionStateHandler $transactionStateHandler
      * @param ContainerInterface $container
      * @param CustomerService $customerService
      * @param PayrexxApiService $payrexxApiService
      * @param TransactionHandler $transactionHandler
      * @param ConfigService $configService
-     * @param type $logger
+     * @param LoggerInterface $logger,
+     * @param RouterInterface $router
      */
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
@@ -88,7 +96,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         PayrexxApiService $payrexxApiService,
         TransactionHandler $transactionHandler,
         ConfigService $configService,
-        $logger
+        LoggerInterface $logger,
+        RouterInterface $router
     ) {
         $this->transactionStateHandler = $transactionStateHandler;
         $this->container = $container;
@@ -97,6 +106,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $this->transactionHandler = $transactionHandler;
         $this->configService = $configService;
         $this->logger = $logger;
+        $this->router = $router;
     }
 
     /**
@@ -156,6 +166,14 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
             throw new Exception('Unavailable payment method error');
         }
+        $cancelUrl = $this->router->generate('frontend.payrexx-payment.cancel',
+            [
+                'orderId' => $order->getOrderNumber(),
+                'transactionId' => $transactionId,
+                'redirect' => base64_encode($transaction->getReturnUrl()),
+            ],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
         // Create Payrexx Gateway link for checkout and redirect user
         try {
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
@@ -168,7 +186,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $transaction->getReturnUrl(),
                 $basket,
                 $salesChannelId,
-                $purpose
+                $purpose,
+                $cancelUrl
             );
 
             if (!$payrexxGateway) {
