@@ -73,7 +73,7 @@ class Cancel
         // Search for the order
         $criteria = new Criteria();
         $criteria->addFilter(
-            new RangeFilter('createdAt', ['lt' => (new \DateTime('-30 minutes'))->format(DATE_ATOM)])
+            new RangeFilter('createdAt', ['gte' => (new \DateTime('-14 minutes'))->format(DATE_ATOM)])
         );
         $criteria->addFilter(
             new EqualsFilter('orderNumber', $orderNumber)
@@ -85,7 +85,7 @@ class Cancel
         if ($orders->count() === 0) {
             $redirectUrl = $router->generate(
                 'frontend.checkout.finish.page',
-                ['orderId' => $transaction->getOrderId()],
+                ['orderId' => $orderNumber],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
             return new RedirectResponse($redirectUrl);
