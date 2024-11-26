@@ -86,7 +86,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param PayrexxApiService $payrexxApiService
      * @param TransactionHandler $transactionHandler
      * @param ConfigService $configService
-     * @param LoggerInterface $logger,
+     * @param LoggerInterface $logger
      * @param RouterInterface $router
      */
     public function __construct(

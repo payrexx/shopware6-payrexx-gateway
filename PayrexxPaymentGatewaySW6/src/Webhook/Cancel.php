@@ -84,7 +84,7 @@ class Cancel
         // Check if any orders match
         if ($orders->count() === 0) {
             $redirectUrl = $router->generate(
-                'frontend.checkout.finish.page',
+                'frontend.account.edit-order.page',
                 ['orderId' => $orderNumber],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
