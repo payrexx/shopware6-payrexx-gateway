@@ -73,30 +73,35 @@ class Cancel
         // Search for the order
         $criteria = new Criteria();
         $criteria->addFilter(
-            new RangeFilter('createdAt', ['gte' => (new \DateTime('-14 minutes'))->format(DATE_ATOM)])
-        );
-        $criteria->addFilter(
             new EqualsFilter('orderNumber', $orderNumber)
         );
 
-        $orders = $orderRepository->search($criteria, $context);
-
-        // Check if any orders match
-        if ($orders->count() === 0) {
-            $redirectUrl = $router->generate(
-                'frontend.account.edit-order.page',
-                ['orderId' => $orderNumber],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-            return new RedirectResponse($redirectUrl);
+        $order = $orderRepository->search($criteria, $context)->first();
+        if (!$order) {
+            return new Response('Order not found.', Response::HTTP_NOT_FOUND);
         }
 
         // Search for the transaction
         $criteria = new Criteria([$transactionId]);
+        $criteria->addFilter(
+            new EqualsFilter('orderId', $order->getId())
+        );
+
         $transaction = $transactionRepo->search($criteria, $context)->first();
 
         if (!$transaction) {
             return new Response('Transaction not found.', Response::HTTP_NOT_FOUND);
+        }
+
+        $transactionCreatedAt = $transaction->getCreatedAt();
+        $thresholdTime = new \DateTime('-10 minutes');
+
+        if ($transactionCreatedAt && $transactionCreatedAt < $thresholdTime) {
+            $redirectUrl = $router->generate(
+                'frontend.account.edit-order.page',
+                ['orderId' => $order->getId()],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
         }
         return new RedirectResponse($redirectUrl);
     }
