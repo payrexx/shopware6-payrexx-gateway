@@ -61,6 +61,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_KLARNA             = 'klarna';
     public const PAYREXX_POSTFINANCE_PAY    = 'post-finance-pay';
     public const PAYREXX_PRE_PAYMENT        = 'pre-payment';
+    public const PAYREXX_PAY_BY_BANK        = 'pay-by-bank';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -471,6 +472,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Pre-Payment',
+                ],
+            ],
+        ],
+        self::PAYREXX_PAY_BY_BANK => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Pay by Bank',
+                ],
+                'en-GB' => [
+                    'name' => 'Pay by Bank',
                 ],
             ],
         ],
