@@ -60,7 +60,6 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_BANK_TRANSFER      = 'bank-transfer';
     public const PAYREXX_KLARNA             = 'klarna';
     public const PAYREXX_POSTFINANCE_PAY    = 'post-finance-pay';
-
     public const PAYREXX_PRE_PAYMENT        = 'pre-payment';
     public const PAYREXX_NO_PM              = '';
 
