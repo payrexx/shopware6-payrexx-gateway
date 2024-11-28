@@ -153,9 +153,15 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $this->customAsyncException($transactionId, $message);
         }
 
+        $oldGatewayId = $orderTransaction->getCustomFields()['gateway_id'] ?? '';
+        if (!empty($oldGatewayId)) {
+            $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $oldGatewayId);
+        }
+
         if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
             throw new Exception('Unavailable payment method error');
         }
+
         // Create Payrexx Gateway link for checkout and redirect user
         try {
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
@@ -174,7 +180,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             if (!$payrexxGateway) {
                 throw new Exception('Gateway creation error');
             }
-            $oldGatewayId = $orderTransaction->getCustomFields()['gateway_id'] ?? '';
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
             $this->transactionHandler->handleTransactionStatus(
                 $orderTransaction,
@@ -182,9 +187,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $salesChannelContext->getContext()
             );
             $redirectUrl = $payrexxGateway->getLink();
-            if (!empty($oldGatewayId)) {
-                $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $oldGatewayId);
-            }
         } catch (\Exception $e) {
             $message = 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage();
             $this->customAsyncException($transactionId, $message);
