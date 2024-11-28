@@ -174,6 +174,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             if (!$payrexxGateway) {
                 throw new Exception('Gateway creation error');
             }
+            $oldGatewayId = $orderTransaction->getCustomFields()['gateway_id'] ?? '';
+            $this->payrexxApiService->deletePayrexxGateway($salesChannelId, $oldGatewayId);
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
             $this->transactionHandler->handleTransactionStatus(
                 $orderTransaction,
@@ -216,6 +218,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         $gatewayIds = explode(',', (string) $gatewayId);
+        // delete gateway
         $payrexxGateway = $this->payrexxApiService->getPayrexxGateway(current($gatewayIds), $salesChannelContext->getSalesChannel()->getId());
         $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelContext->getSalesChannel()->getId());
 

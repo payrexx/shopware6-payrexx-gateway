@@ -65,22 +65,6 @@ class TransactionHandler
     {
         $transactionRepo = $this->container->get('order_transaction.repository');
 
-        // Manage existing gateway ids.
-        $criteria = new Criteria([$transactionId]);
-        $criteria->addAssociation('customFields');
-        $transaction = $transactionRepo->search($criteria, $salesChannelContext->getContext())->first();
-        if ($transaction) {
-            $customFields = $transaction->getCustomFields() ?? [];
-            $gatewayIds = $customFields['gateway_id'] ?? '';
-
-            if (!empty($gatewayIds)) {
-                // Save new gateway id first.
-                $newGatewayId = $details['gateway_id'] . ',' . $gatewayIds;
-                $newGatewayIds = array_slice(explode(',', $newGatewayId), 0, 5);
-                $details['gateway_id'] = implode(',', $newGatewayIds);
-            }
-        }
-
         $transactionRepo->upsert([[
             'id' => $transactionId,
             'customFields' => $details
