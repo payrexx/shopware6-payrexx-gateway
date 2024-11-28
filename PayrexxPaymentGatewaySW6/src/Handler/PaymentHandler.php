@@ -170,7 +170,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             [
                 'orderId' => $order->getOrderNumber(),
                 'transactionId' => $transactionId,
-                'redirect' => base64_encode($transaction->getReturnUrl()),
             ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );

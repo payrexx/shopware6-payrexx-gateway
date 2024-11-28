@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace PayrexxPaymentGateway\Webhook;
 
+use PayrexxPaymentGateway\Handler\TransactionHandler;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -35,10 +37,20 @@ class Cancel
     protected $container;
 
     /**
-     * @param ContainerInterface $container
+     * @var TransactionHandler
      */
-    public function __construct(ContainerInterface $container) {
+    protected $transactionHandler;
+
+    /**
+     * @param ContainerInterface $container
+     * @param TransactionHandler $transactionHandler
+     */
+    public function __construct(
+        ContainerInterface $container,
+        TransactionHandler $transactionHandler
+    ) {
         $this->container = $container;
+        $this->transactionHandler = $transactionHandler;
     }
 
     /**
@@ -63,7 +75,6 @@ class Cancel
         // Get parameters from the request
         $orderNumber = $request->query->get('orderId');
         $transactionId = $request->query->get('transactionId');
-        $redirectUrl = base64_decode($request->query->get('redirect'));
 
         // Validate input
         if (!$orderNumber || !$transactionId) {
@@ -92,17 +103,17 @@ class Cancel
         if (!$transaction) {
             return new Response('Transaction not found.', Response::HTTP_NOT_FOUND);
         }
-
-        $transactionCreatedAt = $transaction->getCreatedAt();
-        $thresholdTime = new \DateTime('-10 minutes');
-
-        if ($transactionCreatedAt && $transactionCreatedAt < $thresholdTime) {
-            $redirectUrl = $router->generate(
-                'frontend.account.edit-order.page',
-                ['orderId' => $order->getId()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-        }
+        
+        $this->transactionHandler->handleTransactionStatus(
+            $transaction,
+            OrderTransactionStates::STATE_CANCELLED,
+            $context
+        );
+        $redirectUrl = $router->generate(
+            'frontend.account.edit-order.page',
+            ['orderId' => $order->getId()],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
         return new RedirectResponse($redirectUrl);
     }
 }

@@ -68,6 +68,7 @@
 
         <service id="PayrexxPaymentGateway\Webhook\Cancel">
             <argument type="service" id="service_container" />
+            <argument type="service" id="PayrexxPaymentGateway\Handler\TransactionHandler" />
         </service>
    </services>
 </container>
