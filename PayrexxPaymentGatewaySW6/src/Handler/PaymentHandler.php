@@ -175,7 +175,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 throw new Exception('Gateway creation error');
             }
             $oldGatewayId = $orderTransaction->getCustomFields()['gateway_id'] ?? '';
-            $this->payrexxApiService->deletePayrexxGateway($salesChannelId, $oldGatewayId);
             $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
             $this->transactionHandler->handleTransactionStatus(
                 $orderTransaction,
@@ -183,6 +182,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $salesChannelContext->getContext()
             );
             $redirectUrl = $payrexxGateway->getLink();
+            if (!empty($oldGatewayId)) {
+                $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $oldGatewayId);
+            }
         } catch (\Exception $e) {
             $message = 'An error occurred during the communication with external payment gateway' . PHP_EOL . $e->getMessage();
             $this->customAsyncException($transactionId, $message);
@@ -224,7 +226,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId);
 
         if (!$payrexxTransaction && $totalAmount > 0) {
-            $this->payrexxApiService->deletePayrexxGateway($salesChannelId, $gatewayId);
+            if (!empty($gatewayId)) {
+                $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $gatewayId);
+            }
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }
 

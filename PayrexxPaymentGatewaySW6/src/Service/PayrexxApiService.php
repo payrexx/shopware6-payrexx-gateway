@@ -198,10 +198,10 @@ class PayrexxApiService
     /**
      * Delete the payrexx gateway
      *
-     * @param string $gatewayId
      * @param string $salesChannelId
+     * @param int $gatewayId
      */
-    public function deletePayrexxGateway(string $gatewayId, string $salesChannelId): void
+    public function deletePayrexxGateway(string $salesChannelId, int $gatewayId): void
     {
         if (empty($gatewayId)) {
             return;
