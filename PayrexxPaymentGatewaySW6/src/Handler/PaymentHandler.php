@@ -161,7 +161,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
             throw new Exception('Unavailable payment method error');
         }
-
         // Create Payrexx Gateway link for checkout and redirect user
         try {
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(

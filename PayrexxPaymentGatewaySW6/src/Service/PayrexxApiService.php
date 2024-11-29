@@ -209,7 +209,7 @@ class PayrexxApiService
 
         $payrexx = $this->getInterface($salesChannelId);
         $gateway = $this->getPayrexxGateway($gatewayId, $salesChannelId);
-        if ($payrexx && $gateway && !$gateway->getInvoices()) {
+        if ($payrexx && $gateway && !$this->getTransactionByGateway($salesChannelId, $gatewayId)) {
             try {
                 $payrexx->delete($gateway);
             } catch (\Payrexx\PayrexxException $e) {
