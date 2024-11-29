@@ -104,11 +104,15 @@ class TransactionHandler
             case Transaction::CANCELLED:
             case Transaction::DECLINED:
             case Transaction::EXPIRED:
-                if ($state !== null && in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_CANCELLED, OrderTransactionStates::STATE_PAID])) break;
+                if ($state !== null && !in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_OPEN, OrderTransactionStates::STATE_UNCONFIRMED])) {
+                    break;
+                }
                 $this->transactionStateHandler->cancel($orderTransaction->getId(), $context);
                 break;
             case Transaction::ERROR:
-                if ($state !== null && in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_FAILED, OrderTransactionStates::STATE_PAID])) break;
+                if ($state !== null && !in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_OPEN, OrderTransactionStates::STATE_UNCONFIRMED])) {
+                    break;
+                }
                 $this->transactionStateHandler->fail($orderTransaction->getId(), $context);
                 break;
         }
