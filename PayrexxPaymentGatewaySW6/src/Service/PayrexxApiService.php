@@ -203,21 +203,28 @@ class PayrexxApiService
      *
      * @param string $salesChannelId
      * @param int $gatewayId
+     * @return bool
      */
-    public function deletePayrexxGateway(string $salesChannelId, int $gatewayId): void
+    public function deletePayrexxGateway(string $salesChannelId, int $gatewayId): bool
     {
         if (empty($gatewayId)) {
-            return;
+            return true;
         }
 
         $payrexx = $this->getInterface($salesChannelId);
         $gateway = $this->getPayrexxGateway($gatewayId, $salesChannelId);
-        if ($payrexx && $gateway && !$this->getTransactionByGateway($salesChannelId, $gatewayId)) {
+
+        if (!$gateway) {
+            return true; // Already deleted.
+        }
+        if ($payrexx && $gateway && !$this->getTransactionByGateway($gateway, $salesChannelId)) {
             try {
                 $payrexx->delete($gateway);
+                return true;
             } catch (\Payrexx\PayrexxException $e) {
-                return;
+                // no action.
             }
         }
+        return false;
     }
 }
