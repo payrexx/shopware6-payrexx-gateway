@@ -97,11 +97,16 @@ class Cancel
         $criteria->addFilter(
             new EqualsFilter('orderId', $order->getId())
         );
+        $criteria->addAssociation('stateMachineState');
 
         $transaction = $transactionRepo->search($criteria, $context)->first();
 
         if (!$transaction) {
             return new Response('Transaction not found.', Response::HTTP_NOT_FOUND);
+        }
+
+        if (!class_exists(\Payrexx\Models\Response\Transaction::class)) {
+            require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';
         }
         
         $this->transactionHandler->handleTransactionStatus(
