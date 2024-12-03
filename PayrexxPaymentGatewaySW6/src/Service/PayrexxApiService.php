@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
@@ -64,6 +65,7 @@ class PayrexxApiService
      * @param array  $basket
      * @param string $salesChannelId
      * @param string $purpose
+     * @param string $cancelUrl
      * @return Gateway
      *
      */
@@ -77,7 +79,8 @@ class PayrexxApiService
         string $url,
         array $basket,
         string $salesChannelId,
-        string $purpose
+        string $purpose,
+        string $cancelUrl
     ) {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
         $lookAndFeelId = !empty($config['lookFeelID']) ? $config['lookFeelID'] : null;
@@ -89,7 +92,7 @@ class PayrexxApiService
         $gateway->setCurrency($currency);
         $gateway->setSuccessRedirectUrl($url);
         $gateway->setFailedRedirectUrl($url);
-        $gateway->setCancelRedirectUrl($url);
+        $gateway->setCancelRedirectUrl($cancelUrl);
         $gateway->setSkipResultPage(true);
         $gateway->setLookAndFeelProfile($lookAndFeelId);
 

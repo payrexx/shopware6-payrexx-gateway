@@ -1,7 +1,7 @@
 {
   "name": "payrexx/payment",
   "description": "A Shopware plugin to accept payments with Payrexx",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "type": "shopware-platform-plugin",
   "license": "MIT",
   "authors": [
