@@ -5,4 +5,4 @@
 - Bug fix: Resolved an issue where deleting a payment gateway for transition change.
 
 ### Added
-- Added support for a new URL to handle unexpected errors.
+- Added a new cancellation URL to handle unexpected errors.
