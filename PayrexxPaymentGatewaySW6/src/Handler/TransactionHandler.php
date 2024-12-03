@@ -65,22 +65,6 @@ class TransactionHandler
     {
         $transactionRepo = $this->container->get('order_transaction.repository');
 
-        // Manage existing gateway ids.
-        $criteria = new Criteria([$transactionId]);
-        $criteria->addAssociation('customFields');
-        $transaction = $transactionRepo->search($criteria, $salesChannelContext->getContext())->first();
-        if ($transaction) {
-            $customFields = $transaction->getCustomFields() ?? [];
-            $gatewayIds = $customFields['gateway_id'] ?? '';
-
-            if (!empty($gatewayIds)) {
-                // Save new gateway id first.
-                $newGatewayId = $details['gateway_id'] . ',' . $gatewayIds;
-                $newGatewayIds = array_slice(explode(',', $newGatewayId), 0, 5);
-                $details['gateway_id'] = implode(',', $newGatewayIds);
-            }
-        }
-
         $transactionRepo->upsert([[
             'id' => $transactionId,
             'customFields' => $details
@@ -120,11 +104,15 @@ class TransactionHandler
             case Transaction::CANCELLED:
             case Transaction::DECLINED:
             case Transaction::EXPIRED:
-                if ($state !== null && in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_CANCELLED, OrderTransactionStates::STATE_PAID])) break;
+                if ($state !== null && !in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_OPEN, OrderTransactionStates::STATE_UNCONFIRMED])) {
+                    break;
+                }
                 $this->transactionStateHandler->cancel($orderTransaction->getId(), $context);
                 break;
             case Transaction::ERROR:
-                if ($state !== null && in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_FAILED, OrderTransactionStates::STATE_PAID])) break;
+                if ($state !== null && !in_array($orderTransaction->getStateMachineState()->getTechnicalName(), [OrderTransactionStates::STATE_OPEN, OrderTransactionStates::STATE_UNCONFIRMED])) {
+                    break;
+                }
                 $this->transactionStateHandler->fail($orderTransaction->getId(), $context);
                 break;
         }

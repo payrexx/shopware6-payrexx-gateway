@@ -194,4 +194,34 @@ class PayrexxApiService
             return null;
         }
     }
+
+    /**
+     * Delete the payrexx gateway
+     *
+     * @param string $salesChannelId
+     * @param int $gatewayId
+     * @return bool
+     */
+    public function deletePayrexxGateway(string $salesChannelId, int $gatewayId): bool
+    {
+        if (empty($gatewayId)) {
+            return true;
+        }
+
+        $payrexx = $this->getInterface($salesChannelId);
+        $gateway = $this->getPayrexxGateway($gatewayId, $salesChannelId);
+
+        if (!$gateway) {
+            return true; // Already deleted.
+        }
+        if ($payrexx && $gateway && !$this->getTransactionByGateway($gateway, $salesChannelId)) {
+            try {
+                $payrexx->delete($gateway);
+                return true;
+            } catch (\Payrexx\PayrexxException $e) {
+                // no action.
+            }
+        }
+        return false;
+    }
 }

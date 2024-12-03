@@ -153,6 +153,26 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $this->customAsyncException($transactionId, $message);
         }
 
+        // Delete gateway from all transactions.
+        foreach($order->getTransactions() as $transactionGateway) {
+            $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
+            if ($oldGatewayId) {
+                $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
+                    $salesChannelId,
+                    (int) $oldGatewayId
+                );
+                if ($gatewayStatus) {
+                    $this->transactionHandler->saveTransactionCustomFields(
+                        $salesChannelContext,
+                        $transactionGateway->getId(),
+                        [
+                            'gateway_id' => '',
+                        ]
+                    );
+                }
+            }
+        }
+
         if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
             throw new Exception('Unavailable payment method error');
         }
@@ -198,6 +218,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     public function finalize(AsyncPaymentTransactionStruct $shopwareTransaction, Request $request, SalesChannelContext $salesChannelContext): void
     {
         $context = $salesChannelContext->getContext();
+        $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
 
         $orderTransaction = $shopwareTransaction->getOrderTransaction();
         $customFields = $orderTransaction->getCustomFields();
@@ -215,11 +236,15 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }
 
-        $gatewayIds = explode(',', (string) $gatewayId);
-        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway(current($gatewayIds), $salesChannelContext->getSalesChannel()->getId());
-        $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelContext->getSalesChannel()->getId());
+        $gatewayIds = explode(',', (string) $gatewayId); // TODO: later remove explode.
+        $gatewayId = current($gatewayIds);
+        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway($gatewayId, $salesChannelId);
+        $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId);
 
         if (!$payrexxTransaction && $totalAmount > 0) {
+            if ($gatewayId) {
+                $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $gatewayId);
+            }
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }
 
