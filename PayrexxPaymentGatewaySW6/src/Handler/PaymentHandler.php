@@ -239,17 +239,21 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
 
         $orderTransaction = $shopwareTransaction->getOrderTransaction();
-        $customFields = $orderTransaction->getCustomFields();
-        $gatewayId = $customFields['gateway_id'];
         $transactionId = $orderTransaction->getId();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
         if ($totalAmount <= 0) {
-            if (OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()) return;
+            if ($orderTransaction->getStateMachineState() &&
+                OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()
+            ) {
+                return;
+            }
             $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
             return;
         }
 
+        $customFields = $orderTransaction->getCustomFields();
+        $gatewayId = $customFields['gateway_id'] ?? '';
         if (empty($gatewayId)) {
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.45]
+### Fixed
+- Bug fix: Resolved an issue for order amount is 0.
+
 ## [1.0.44]
 ### Fixed
 - Bug fix: Resolved an issue where deleting a payment gateway for transition change.
