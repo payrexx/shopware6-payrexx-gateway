@@ -155,13 +155,13 @@ class Dispatcher
 
         // Validate request by gateway ID
         if (!$transaction) {
-            return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
+            return new Response('Validation: Gateway id not found', Response::HTTP_BAD_REQUEST);
         }
 
         // Validate request by status
         $payrexxTransaction = $this->payrexxApiService->getPayrexxTransaction($requestTransaction->id, $order->getSalesChannelId());
         if ($payrexxTransaction->getStatus() !== $requestTransaction->status) {
-            return new Response('Malicious request', Response::HTTP_BAD_REQUEST);
+            return new Response('Validation: Status Mismatch', Response::HTTP_BAD_REQUEST);
         }
 
         $this->transactionHandler->handleTransactionStatus($transaction, $requestTransaction->status, $context);
