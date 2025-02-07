@@ -1,6 +1,6 @@
 <?php
 
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     $root = dirname(__DIR__);
     $classFile = $root . '/lib/' . str_replace('\\', '/', $class) . '.php';
     if (file_exists($classFile)) {
@@ -19,15 +19,11 @@ $secret = 'YOUR_SECRET';
 $payrexx = new \Payrexx\Payrexx($instanceName, $secret);
 
 $transaction = new \Payrexx\Models\Request\Transaction();
-$transaction->setFilterDatetimeUtcGreaterThan(new \DateTime('2019-12-01 00:00:00'));
-$transaction->setFilterDatetimeUtcLessThan(new \DateTime('2020-10-01 00:00:00'));
-$transaction->getFilterMyTransactionsOnly(true);
-$transaction->setOrderByTime('ASC');
-$transaction->setOffset(40);
-$transaction->setLimit(20);
+$transaction->setId(1);
+$transaction->setRecipient('recipient@gmail.com');
 
 try {
-    $response = $payrexx->getAll($transaction);
+    $response = $payrexx->receipt($transaction);
     var_dump($response);
 } catch (\Payrexx\PayrexxException $e) {
     print $e->getMessage();

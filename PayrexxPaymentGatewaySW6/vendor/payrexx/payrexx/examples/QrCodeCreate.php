@@ -18,16 +18,13 @@ $secret = 'YOUR_SECRET';
 
 $payrexx = new \Payrexx\Payrexx($instanceName, $secret);
 
-$transaction = new \Payrexx\Models\Request\Transaction();
-$transaction->setFilterDatetimeUtcGreaterThan(new \DateTime('2019-12-01 00:00:00'));
-$transaction->setFilterDatetimeUtcLessThan(new \DateTime('2020-10-01 00:00:00'));
-$transaction->getFilterMyTransactionsOnly(true);
-$transaction->setOrderByTime('ASC');
-$transaction->setOffset(40);
-$transaction->setLimit(20);
+$qrCode = new \Payrexx\Models\Request\QrCode();
+
+// An URL where the your customer has to be redirected when they scanned your QR Code.
+$qrCode->setWebshopUrl('YOUR_WEBSHOP_URL');
 
 try {
-    $response = $payrexx->getAll($transaction);
+    $response = $payrexx->create($qrCode);
     var_dump($response);
 } catch (\Payrexx\PayrexxException $e) {
     print $e->getMessage();
