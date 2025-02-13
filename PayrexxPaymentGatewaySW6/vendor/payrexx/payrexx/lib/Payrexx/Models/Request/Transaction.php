@@ -17,12 +17,23 @@ class Transaction extends \Payrexx\Models\Base
 {
     /** @var int $amount */
     protected $amount;
+    /** @var string $currency */
+    protected $currency;
     /** @var string $purpose */
     protected $purpose;
+    /** @var float $vatRate */
+    protected $vatRate;
+    /** @var array $fields */
+    protected $fields;
     /** @var string $referenceId */
     protected $referenceId;
+    /** @var string $recipient */
+    protected $recipient;
     protected $filterDatetimeUtcGreaterThan;
     protected $filterDatetimeUtcLessThan;
+    protected $filterMyTransactionsOnly = false;
+    /** @var string $orderByTime */
+    protected $orderByTime = 'ASC';
     protected $offset;
     protected $limit;
 
@@ -45,6 +56,22 @@ class Transaction extends \Payrexx\Models\Base
     /**
      * @return string
      */
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param string $currency
+     */
+    public function setCurrency(string $currency): void
+    {
+        $this->currency = $currency;
+    }
+
+    /**
+     * @return string
+     */
     public function getPurpose()
     {
         return $this->purpose;
@@ -56,6 +83,44 @@ class Transaction extends \Payrexx\Models\Base
     public function setPurpose($purpose)
     {
         $this->purpose = $purpose;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getVatRate(): ?float
+    {
+        return $this->vatRate;
+    }
+
+    /**
+     * @param float $vatRate
+     */
+    public function setVatRate(float $vatRate): void
+    {
+        $this->vatRate = $vatRate;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFields(): array
+    {
+        return $this->fields ?? [];
+    }
+
+    /**
+     * @param string $type
+     * @param string $value
+     * @param array $name
+     * @return void
+     */
+    public function addField(string $type, string $value, array $name = []): void
+    {
+        $this->fields[$type] = [
+            'value' => $value,
+            'name' => $name,
+        ];
     }
 
     /**
@@ -72,6 +137,22 @@ class Transaction extends \Payrexx\Models\Base
     public function setReferenceId($referenceId)
     {
         $this->referenceId = $referenceId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRecipient()
+    {
+        return $this->recipient;
+    }
+
+    /**
+     * @param string $recipient
+     */
+    public function setRecipient($recipient)
+    {
+        $this->recipient = $recipient;
     }
 
     /**
@@ -104,6 +185,38 @@ class Transaction extends \Payrexx\Models\Base
     public function setFilterDatetimeUtcLessThan(\DateTime $filterDatetimeUtcLessThan): void
     {
         $this->filterDatetimeUtcLessThan = $filterDatetimeUtcLessThan->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * @return bool
+     */
+    public function getFilterMyTransactionsOnly(): bool
+    {
+        return $this->filterMyTransactionsOnly;
+    }
+
+    /**
+     * @param bool $filterMyTransactionsOnly
+     */
+    public function setFilterMyTransactionsOnly(bool $filterMyTransactionsOnly): void
+    {
+        $this->filterMyTransactionsOnly = $filterMyTransactionsOnly;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOrderByTime(): ?string
+    {
+        return $this->orderByTime;
+    }
+
+    /**
+     * @param string $orderByTime
+     */
+    public function setOrderByTime(string $orderByTime): void
+    {
+        $this->orderByTime = $orderByTime;
     }
 
     /**

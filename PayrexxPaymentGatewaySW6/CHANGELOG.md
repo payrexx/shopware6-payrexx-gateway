@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.46]
+### Improvement
+- Upgraded Payrexx API to latest.
+
 ## [1.0.45]
 ### Fixed
 - Bug fix: Resolved an issue for order amount is 0.

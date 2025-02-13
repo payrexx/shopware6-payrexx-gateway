@@ -18,16 +18,13 @@ $secret = 'YOUR_SECRET';
 
 $payrexx = new \Payrexx\Payrexx($instanceName, $secret);
 
-$transaction = new \Payrexx\Models\Request\Transaction();
-$transaction->setFilterDatetimeUtcGreaterThan(new \DateTime('2019-12-01 00:00:00'));
-$transaction->setFilterDatetimeUtcLessThan(new \DateTime('2020-10-01 00:00:00'));
-$transaction->getFilterMyTransactionsOnly(true);
-$transaction->setOrderByTime('ASC');
-$transaction->setOffset(40);
-$transaction->setLimit(20);
+$qrCode = new \Payrexx\Models\Request\QrCode();
+// UUIDv4
+$qrCode->setUuid('QR_CODE_UUID');
 
 try {
-    $response = $payrexx->getAll($transaction);
+    /** @var \Payrexx\Models\Response\QrCode $response */
+    $response = $payrexx->delete($qrCode);
     var_dump($response);
 } catch (\Payrexx\PayrexxException $e) {
     print $e->getMessage();
