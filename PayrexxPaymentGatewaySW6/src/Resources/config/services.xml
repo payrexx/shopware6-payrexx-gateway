@@ -16,6 +16,7 @@
             <argument type="service" id="PayrexxPaymentGateway\Service\ConfigService" />
             <argument type="service" id="monolog.logger"/>
             <argument type="service" id="router" />
+            <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack" />
             <tag name="shopware.payment.method.async" />
         </service>
 
