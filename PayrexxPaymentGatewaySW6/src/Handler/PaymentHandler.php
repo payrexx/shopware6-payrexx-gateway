@@ -196,24 +196,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             throw new Exception('Unavailable payment method error');
         }
 
-        $returnUrl = $transaction->getReturnUrl();
-        $request = $this->requestStack->getCurrentRequest();
-        $urlPath = $request ? $request->getPathInfo() : '';
-
-        // Check if the request comes from Store API (headless frontend)
-        $isStoreApiRequest = str_starts_with($urlPath, '/store-api');
-
-        $cancelUrl = $isStoreApiRequest
-            ? $returnUrl
-            : $this->router->generate(
-                'frontend.payrexx-payment.cancel',
-                [
-                    'orderId' => $order->getOrderNumber(),
-                    'transactionId' => $transactionId,
-                ],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-
+        $returnUrl = $this->createReturnUrl(
+            $transaction,
+            $order->getOrderNumber(),
+            $transactionId
+        );
         // Create Payrexx Gateway link for checkout and redirect user
         try {
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
@@ -226,8 +213,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $returnUrl,
                 $basket,
                 $salesChannelId,
-                $purpose,
-                $cancelUrl
+                $purpose
             );
 
             if (!$payrexxGateway) {
@@ -456,5 +442,40 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             // support from shopware 6.6
             throw PaymentException::customerCanceled($transactionId, $message);
         }
+    }
+
+    /**
+     * Build return url
+     *
+     * @param AsyncPaymentTransactionStruct $transaction
+     * @param string $orderNumber
+     * @param string $transactionId
+     * @return array
+     */
+    private function createReturnUrl(
+        AsyncPaymentTransactionStruct $transaction,
+        string $orderNumber,
+        string $transactionId
+    ): array {
+        $returnUrl = $transaction->getReturnUrl();
+        $request = $this->requestStack->getCurrentRequest();
+        $urlPath = $request ? $request->getPathInfo() : '';
+
+        // Check if the request comes from Store API (headless frontend)
+        $isStoreApiRequest = str_starts_with($urlPath, '/store-api');
+
+        return [
+            'success' => $returnUrl,
+            'cancel' => $isStoreApiRequest
+                ? $returnUrl
+                : $this->router->generate(
+                    'frontend.payrexx-payment.cancel',
+                    [
+                        'orderId' => $orderNumber,
+                        'transactionId' => $transactionId,
+                    ],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                ),
+        ];
     }
 }

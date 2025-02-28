@@ -61,11 +61,10 @@ class PayrexxApiService
      * @param string $currency
      * @param string $paymentMean
      * @param array  $billingAndShippingDetails
-     * @param string $url
+     * @param array  $redirectUrl
      * @param array  $basket
      * @param string $salesChannelId
      * @param string $purpose
-     * @param string $cancelUrl
      * @return Gateway
      *
      */
@@ -76,11 +75,10 @@ class PayrexxApiService
         string $currency,
         string $paymentMean,
         array $billingAndShippingDetails,
-        string $url,
+        array $redirectUrl,
         array $basket,
         string $salesChannelId,
-        string $purpose,
-        string $cancelUrl
+        string $purpose
     ) {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
         $lookAndFeelId = !empty($config['lookFeelID']) ? $config['lookFeelID'] : null;
@@ -90,9 +88,9 @@ class PayrexxApiService
         $gateway->setAmount($amount * 100);
         $gateway->setVatRate($averageVatRate);
         $gateway->setCurrency($currency);
-        $gateway->setSuccessRedirectUrl($url);
-        $gateway->setFailedRedirectUrl($url);
-        $gateway->setCancelRedirectUrl($cancelUrl);
+        $gateway->setSuccessRedirectUrl($redirectUrl['success']);
+        $gateway->setFailedRedirectUrl($redirectUrl['cancel']);
+        $gateway->setCancelRedirectUrl($redirectUrl['cancel']);
         $gateway->setSkipResultPage(true);
         $gateway->setLookAndFeelProfile($lookAndFeelId);
 
