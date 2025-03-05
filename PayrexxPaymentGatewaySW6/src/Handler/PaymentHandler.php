@@ -30,6 +30,7 @@ use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymentExcepti
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
 use Shopware\Core\Checkout\Payment\PaymentException;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -80,6 +81,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     protected $router;
 
     /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @param OrderTransactionStateHandler $transactionStateHandler
      * @param ContainerInterface $container
      * @param CustomerService $customerService
@@ -88,6 +94,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param ConfigService $configService
      * @param LoggerInterface $logger
      * @param RouterInterface $router
+     * @param RequestStack $requestStack
      */
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
@@ -97,7 +104,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         TransactionHandler $transactionHandler,
         ConfigService $configService,
         LoggerInterface $logger,
-        RouterInterface $router
+        RouterInterface $router,
+        RequestStack $requestStack
     ) {
         $this->transactionStateHandler = $transactionStateHandler;
         $this->container = $container;
@@ -107,6 +115,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $this->configService = $configService;
         $this->logger = $logger;
         $this->router = $router;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -186,12 +195,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
             throw new Exception('Unavailable payment method error');
         }
-        $cancelUrl = $this->router->generate('frontend.payrexx-payment.cancel',
-            [
-                'orderId' => $order->getOrderNumber(),
-                'transactionId' => $transactionId,
-            ],
-            UrlGeneratorInterface::ABSOLUTE_URL
+
+        $returnUrl = $this->createReturnUrl(
+            $transaction,
+            $order->getOrderNumber(),
+            $transactionId
         );
         // Create Payrexx Gateway link for checkout and redirect user
         try {
@@ -202,11 +210,10 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $salesChannelContext->getCurrency()->getIsoCode(),
                 $paymentMean,
                 $billingAndShippingDetails,
-                $transaction->getReturnUrl(),
+                $returnUrl,
                 $basket,
                 $salesChannelId,
-                $purpose,
-                $cancelUrl
+                $purpose
             );
 
             if (!$payrexxGateway) {
@@ -435,5 +442,40 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             // support from shopware 6.6
             throw PaymentException::customerCanceled($transactionId, $message);
         }
+    }
+
+    /**
+     * Build return url
+     *
+     * @param AsyncPaymentTransactionStruct $transaction
+     * @param string $orderNumber
+     * @param string $transactionId
+     * @return array
+     */
+    private function createReturnUrl(
+        AsyncPaymentTransactionStruct $transaction,
+        string $orderNumber,
+        string $transactionId
+    ): array {
+        $returnUrl = $transaction->getReturnUrl();
+        $request = $this->requestStack->getCurrentRequest();
+        $urlPath = $request ? $request->getPathInfo() : '';
+
+        // Check if the request comes from Store API (headless frontend)
+        $isStoreApiRequest = (strpos($urlPath, '/store-api') === 0);
+
+        return [
+            'success' => $returnUrl,
+            'cancel' => $isStoreApiRequest
+                ? $returnUrl
+                : $this->router->generate(
+                    'frontend.payrexx-payment.cancel',
+                    [
+                        'orderId' => $orderNumber,
+                        'transactionId' => $transactionId,
+                    ],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                ),
+        ];
     }
 }

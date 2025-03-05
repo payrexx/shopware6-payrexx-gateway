@@ -3,6 +3,7 @@
 ## [1.0.46]
 ### Improvement
 - Upgraded Payrexx API to latest.
+- Fixed cancellation redirect URL for Store API.
 
 ## [1.0.45]
 ### Fixed
