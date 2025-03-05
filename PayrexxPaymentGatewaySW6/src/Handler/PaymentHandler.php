@@ -462,7 +462,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $urlPath = $request ? $request->getPathInfo() : '';
 
         // Check if the request comes from Store API (headless frontend)
-        $isStoreApiRequest = str_starts_with($urlPath, '/store-api');
+        $isStoreApiRequest = (strpos($urlPath, '/store-api') === 0);
 
         return [
             'success' => $returnUrl,
