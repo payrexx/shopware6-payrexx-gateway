@@ -6,4 +6,5 @@
     <import resource="../../../../Controller/**/*Controller.php" type="annotation"/>
     <import resource="../../../../Webhook/**/Dispatcher.php" type="annotation"/>
     <import resource="../../../../Webhook/**/Cancel.php" type="annotation"/>
+    <import resource="../../../../Webhook/**/Webhook.php" type="annotation"/>
 </routes>
