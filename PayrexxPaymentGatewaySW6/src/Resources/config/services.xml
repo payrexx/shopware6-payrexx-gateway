@@ -67,15 +67,6 @@
             <argument type="service" id="monolog.logger"/>
         </service>
 
-        <service id="PayrexxPaymentGateway\Webhook\Webhook">
-            <argument type="service" id="Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler"/>
-            <argument type="service" id="service_container" />
-            <argument type="service" id="PayrexxPaymentGateway\Service\ConfigService" />
-            <argument type="service" id="PayrexxPaymentGateway\Service\PayrexxApiService" />
-            <argument type="service" id="PayrexxPaymentGateway\Handler\TransactionHandler" />
-            <argument type="service" id="monolog.logger"/>
-        </service>
-
         <service id="PayrexxPaymentGateway\Webhook\Cancel">
             <argument type="service" id="service_container" />
             <argument type="service" id="PayrexxPaymentGateway\Handler\TransactionHandler" />

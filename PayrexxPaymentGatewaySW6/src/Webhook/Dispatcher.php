@@ -30,12 +30,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route(defaults={"_routeScope"={"storefront"}})
+ * @Route(defaults={"_routeScope"={"storefront", "api"}})
  */
-#[Route(defaults: ['_routeScope' => ['storefront']])]
+#[Route(defaults: ['_routeScope' => ['storefront', 'api']])]
 class Dispatcher
 {
-
     /**
      * @var OrderTransactionStateHandler
      */
@@ -96,19 +95,29 @@ class Dispatcher
      *     "/payrexx-payment/webhook",
      *     name="frontend.payrexx-payment.webhook",
      *     methods={"POST"},
-     *     defaults={"csrf_protected"=false}
+     *     defaults={"csrf_protected"=false, "auth_required"=false}
+     * )
+     *
+     * @Route(
+     *     "/api/_action/payrexx-payment/webhook",
+     *     name="api.payrexx-payment.webhook",
+     *     methods={"POST"},
+     *     defaults={"auth_required"=false}
      * )
      *
      * @param Request $request
      * @param Context $context
      * @return Response
      */
-    #[Route(path: '/payrexx-payment/webhook', name: 'frontend.payrexx-payment.webhook', methods: ['POST'], defaults: ['csrf_protected' => false])]
+    #[Route(path: '/payrexx-payment/webhook', name: 'frontend.payrexx-payment.webhook', methods: ['POST'], defaults: ['csrf_protected' => false, 'auth_required' => false])]
+    #[Route(path: '/api/_action/payrexx-payment/webhook', name: 'api.action.payrexx-payment.webhook', methods: ['POST'], defaults: ['auth_required' => false])]
     public function executeWebhook(Request $request, Context $context): Response
     {
         $content = json_decode($request->getContent());
-
-        $requestTransaction = $content->transaction;
+        $requestTransaction = $content->transaction ?? '';
+        if (empty($requestTransaction)) {
+            return new Response('Data incomplete', Response::HTTP_BAD_REQUEST);
+        }
         $swOrderNumber = $requestTransaction->referenceId;
         $requestGatewayId = $requestTransaction->invoice->paymentRequestId;
 
