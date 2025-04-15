@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.47]
+### Feature
+- Added a new payment method for Powerpay.
+
 ## [1.0.46]
 ### Improvement
 - Upgraded Payrexx API to latest.

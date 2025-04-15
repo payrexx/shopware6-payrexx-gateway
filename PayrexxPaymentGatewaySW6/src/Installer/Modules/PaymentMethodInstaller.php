@@ -62,6 +62,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_POSTFINANCE_PAY    = 'post-finance-pay';
     public const PAYREXX_PRE_PAYMENT        = 'pre-payment';
     public const PAYREXX_PAY_BY_BANK        = 'pay-by-bank';
+    public const PAYREXX_POWERPAY           = 'powerpay';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -482,6 +483,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Pay by Bank',
+                ],
+            ],
+        ],
+        self::PAYREXX_POWERPAY => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'Powerpay',
+                ],
+                'en-GB' => [
+                    'name' => 'Powerpay',
                 ],
             ],
         ],
