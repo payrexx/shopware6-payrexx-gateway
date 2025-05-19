@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.48]
+### Feature
+- Added a new payment method for Cembrapay.
+
 ## [1.0.47]
 ### Feature
 - Added a new payment method for Powerpay.
