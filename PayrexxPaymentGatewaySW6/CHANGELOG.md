@@ -2,7 +2,7 @@
 
 ## [1.0.48]
 ### Feature
-- Added a new payment method for Cembrapay.
+- Added a new payment method for CembraPay.
 
 ## [1.0.47]
 ### Feature
