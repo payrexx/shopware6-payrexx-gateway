@@ -215,12 +215,18 @@ class PayrexxApiService
         if (!$gateway) {
             return true; // Already deleted.
         }
-        if ($payrexx && $gateway && !$this->getTransactionByGateway($gateway, $salesChannelId)) {
-            try {
-                $payrexx->delete($gateway);
-                return true;
-            } catch (\Payrexx\PayrexxException $e) {
-                // no action.
+        if ($payrexx && $gateway) {
+            $transaction = $this->getTransactionByGateway($gateway, $salesChannelId);
+            if (!$transaction) {
+                try {
+                    $payrexx->delete($gateway);
+                    return true;
+                } catch (\Payrexx\PayrexxException $e) {
+                    // no action.
+                }
+            }
+            if ($transaction && !in_array($transaction->getStatus(), [Transaction::CONFIRMED, Transaction::WAITING])) {
+                return true; // Delete from shopware only.
             }
         }
         return false;
