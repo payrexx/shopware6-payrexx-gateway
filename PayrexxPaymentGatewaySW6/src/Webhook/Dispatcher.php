@@ -155,7 +155,10 @@ class Dispatcher
 
         // Validate request by gateway ID
         if (!$transaction) {
-            return new Response('Validation: Gateway id not found', Response::HTTP_BAD_REQUEST);
+            return new Response(
+                'Validation: Gateway ID not found in shopware. Transaction might be unsuccessful.',
+                Response::HTTP_OK
+            );
         }
 
         // Validate request by status
