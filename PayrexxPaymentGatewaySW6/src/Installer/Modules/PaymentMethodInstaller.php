@@ -63,6 +63,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_PRE_PAYMENT        = 'pre-payment';
     public const PAYREXX_PAY_BY_BANK        = 'pay-by-bank';
     public const PAYREXX_POWERPAY           = 'powerpay';
+    public const PAYREXX_CEMBRAPAY          = 'cembrapay';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -493,6 +494,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Powerpay',
+                ],
+            ],
+        ],
+        self::PAYREXX_CEMBRAPAY => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'CembraPay',
+                ],
+                'en-GB' => [
+                    'name' => 'CembraPay',
                 ],
             ],
         ],
