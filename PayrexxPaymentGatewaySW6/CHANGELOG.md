@@ -3,6 +3,8 @@
 ## [1.0.48]
 ### Feature
 - Added a new payment method for CembraPay.
+### Improvement
+- Improved the code to delete unsuccessful gateway.
 
 ## [1.0.47]
 ### Feature
