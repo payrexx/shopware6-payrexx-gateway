@@ -167,8 +167,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         // Compare with rounded totals to check if basket is correct
         if ($totalAmount !== $basketAmount) {
             $basket = [];
-            var_dump($totalAmount);
-            var_dump($basketAmount);die;
         }
 
         $averageVatRate = $this->getAverageTaxRate($order);
