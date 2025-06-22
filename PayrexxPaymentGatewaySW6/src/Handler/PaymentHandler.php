@@ -132,7 +132,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $orderTransaction = $transaction->getOrderTransaction();
         $order = $transaction->getOrder();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
-        $totalAmount = round($totalAmount, 2);
+
+        // Convert to cents and round for further usage
+        $totalAmount = intval($totalAmount * 100);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
@@ -165,6 +167,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         // Compare with rounded totals to check if basket is correct
         if ($totalAmount !== $basketAmount) {
             $basket = [];
+            var_dump($totalAmount);
+            var_dump($basketAmount);die;
         }
 
         $averageVatRate = $this->getAverageTaxRate($order);
@@ -386,15 +390,15 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param $basket
      * @return float
      */
-    private function getBasketAmount($basket): float
+    private function getBasketAmount($basket): int
     {
         $basketAmount = 0;
 
         foreach ($basket as $product) {
-            $amount = $product['amount'] / 100;
+            $amount = $product['amount'];
             $basketAmount += $product['quantity'] * $amount;
         }
-        return round(floatval($basketAmount), 2);
+        return intval($basketAmount);
     }
 
     /**
