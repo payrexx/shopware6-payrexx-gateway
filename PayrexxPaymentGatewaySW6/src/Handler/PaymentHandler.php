@@ -132,6 +132,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $orderTransaction = $transaction->getOrderTransaction();
         $order = $transaction->getOrder();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
+        $totalAmount = round($totalAmount, 2);
 
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
@@ -160,6 +161,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $basket = $this->collectBasketData($order, $salesChannelContext);
         $purpose = $this->createPurposeByBasket($basket);
         $basketAmount = $this->getBasketAmount($basket);
+
+        // Compare with rounded totals to check if basket is correct
         if ($totalAmount !== $basketAmount) {
             $basket = [];
         }
@@ -391,7 +394,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $amount = $product['amount'] / 100;
             $basketAmount += $product['quantity'] * $amount;
         }
-        return floatval($basketAmount);
+        return round(floatval($basketAmount), 2);
     }
 
     /**
