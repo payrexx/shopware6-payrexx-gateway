@@ -12,35 +12,16 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 class CustomerService
 {
-    /**
-     * @var EntityRepository
-     */
-    protected $addressRepository;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected EntityRepository $addressRepository;
+    protected LoggerInterface $logger;
 
-    /**
-     * Constructor
-     *
-     * @param EntityRepository $addressRepository
-     * @param LoggerInterface $logger
-     */
     public function __construct(EntityRepository $addressRepository, LoggerInterface $logger)
     {
         $this->addressRepository = $addressRepository;
         $this->logger = $logger;
     }
 
-    /**
-     * Returns the billing and shipping details
-     *
-     * @param OrderEntity $order
-     * @param Context $context
-     * @return array
-     */
     public function getBillingAndShippingDetails(OrderEntity $order, Context $context): array
     {
         try {

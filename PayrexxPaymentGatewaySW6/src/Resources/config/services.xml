@@ -17,7 +17,7 @@
             <argument type="service" id="monolog.logger"/>
             <argument type="service" id="router" />
             <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack" />
-            <tag name="shopware.payment.method.async" />
+            <tag name="shopware.payment.method" />
         </service>
 
         <service id="PayrexxPaymentGateway\Handler\TransactionHandler">
@@ -38,14 +38,6 @@
         <service id="PayrexxPaymentGateway\Service\ConfigService" class="PayrexxPaymentGateway\Service\ConfigService">
             <argument type="service" id="system_config.repository" />
             <argument type="service" id="monolog.logger"/>
-        </service>
-
-        <service id="PayrexxPaymentGateway\Controller\SettingsController">
-            <argument type="service" id="service_container" />
-            <argument type="service" id="monolog.logger"/>
-            <call method="setContainer">
-                <argument type="service" id="service_container"/>
-            </call>
         </service>
 
         <service id="PayrexxPaymentGateway\CookieProvider\CookieProvider" decorates="Shopware\Storefront\Framework\Cookie\CookieProviderInterface">

@@ -12,8 +12,8 @@
   ],
   "require": {
     "php": "^7.4 || ^8",
-    "shopware/core": "~6.4.0 || ~6.5.0 || ~6.6.0",
-    "shopware/administration": "~6.4.0 || ~6.5.0 || ~6.6.0",
+    "shopware/core": "~6.4.0 || ~6.5.0 || ~6.6.0 || ~6.7.0",
+    "shopware/administration": "~6.4.0 || ~6.5.0 || ~6.6.0 || ~6.7.0",
     "payrexx/payrexx": "^1.8"
   },
   "autoload": {

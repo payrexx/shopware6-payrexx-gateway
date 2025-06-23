@@ -36,44 +36,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class Dispatcher
 {
 
-    /**
-     * @var OrderTransactionStateHandler
-     */
-    protected $transactionStateHandler;
+    protected OrderTransactionStateHandler $transactionStateHandler;
+    protected ContainerInterface $container;
+    protected ConfigService $configService;
+    protected PayrexxApiService $payrexxApiService;
+    protected TransactionHandler $transactionHandler;
+    protected LoggerInterface $logger;
 
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var ConfigService
-     */
-    protected $configService;
-
-    /**
-     * @var PayrexxApiService
-     */
-    protected $payrexxApiService;
-
-    /**
-     * @var TransactionHandler
-     */
-    protected $transactionHandler;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @param OrderTransactionStateHandler $transactionStateHandler
-     * @param ContainerInterface $container
-     * @param ConfigService $configService
-     * @param PayrexxApiService $payrexxApiService
-     * @param TransactionHandler $transactionHandler
-     * @param type $logger
-     */
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
         ContainerInterface $container,
@@ -98,10 +67,6 @@ class Dispatcher
      *     methods={"POST"},
      *     defaults={"csrf_protected"=false}
      * )
-     *
-     * @param Request $request
-     * @param Context $context
-     * @return Response
      */
     #[Route(path: '/payrexx-payment/webhook', name: 'frontend.payrexx-payment.webhook', methods: ['POST'], defaults: ['csrf_protected' => false])]
     public function executeWebhook(Request $request, Context $context): Response

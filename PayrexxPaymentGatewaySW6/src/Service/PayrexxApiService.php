@@ -3,38 +3,17 @@
 namespace PayrexxPaymentGateway\Service;
 
 use Payrexx\Communicator;
+use Payrexx\Models\Response\Gateway;
 use Payrexx\Models\Response\Transaction;
 use Psr\Log\LoggerInterface;
-use Shopware\Core\Framework\Context;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
 class PayrexxApiService
 {
-    /**
-     * @var EntityRepository
-     */
-    protected $customerRepository;
+    protected EntityRepository $customerRepository;
+    protected LoggerInterface $logger;
+    protected ConfigService $configService;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var ConfigService
-     */
-    protected $configService;
-
-    /**
-     * Constructor
-     *
-     * @param EntityRepository $customerRepository
-     * @param LoggerInterface $logger
-     */
     public function __construct(EntityRepository $customerRepository, LoggerInterface $logger, ConfigService $configService)
     {
         $this->customerRepository = $customerRepository;
@@ -42,10 +21,7 @@ class PayrexxApiService
         $this->configService = $configService;
     }
 
-    /**
-     * @return \Payrexx\Payrexx
-     */
-    private function getInterface($salesChannelId): \Payrexx\Payrexx
+    private function getInterface(string $salesChannelId): \Payrexx\Payrexx
     {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
         $platform = !empty($config['platform']) ? $config['platform'] : Communicator::API_URL_BASE_DOMAIN;
@@ -54,19 +30,6 @@ class PayrexxApiService
 
     /**
      * Create a checkout page in Payrexx (Payrexx Gateway)
-     *
-     * @param string $orderNumber
-     * @param float  $amount
-     * @param float  $averageVatRate,
-     * @param string $currency
-     * @param string $paymentMean
-     * @param array  $billingAndShippingDetails
-     * @param array  $redirectUrl
-     * @param array  $basket
-     * @param string $salesChannelId
-     * @param string $purpose
-     * @return Gateway
-     *
      */
     public function createPayrexxGateway(
         string $orderNumber,
@@ -79,7 +42,7 @@ class PayrexxApiService
         array $basket,
         string $salesChannelId,
         string $purpose
-    ) {
+    ): ?Gateway  {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
         $lookAndFeelId = !empty($config['lookFeelID']) ? $config['lookFeelID'] : null;
 
@@ -117,12 +80,7 @@ class PayrexxApiService
         return null;
     }
 
-    /**
-     * @param $gatewayId
-     * @param string $salesChannelId
-     * @return \Payrexx\Models\Request\Gateway|bool
-     */
-    public function getPayrexxGateway($gatewayId, string $salesChannelId)
+    public function getPayrexxGateway(int $gatewayId, string $salesChannelId): Gateway|bool
     {
         if (!$gatewayId) {
             return false;
@@ -140,15 +98,11 @@ class PayrexxApiService
 
     /**
      * capture a Transaction
-     *
-     * @param integer $gatewayId The Payrexx Gateway ID
-     * @param string $salesChannelId
-     * @return string
      */
-    public function captureTransaction($transactionId, $salesChannelId)
+    public function captureTransaction(int $transactionId, string $salesChannelId): void
     {
         if (!$transactionId) {
-            return false;
+            return;
         }
         $payrexx = $this->getInterface($salesChannelId);
 
@@ -156,14 +110,13 @@ class PayrexxApiService
         $transaction->setId($transactionId);
 
         try {
-            $response = $payrexx->capture($transaction);
-            return $response;
+            $payrexx->capture($transaction);
         } catch (\Payrexx\PayrexxException $e) {
-            return $e->getMessage();
+            return;
         }
     }
 
-    public function getTransactionByGateway($payrexxGateway, $salesChannelId): ?\Payrexx\Models\Response\Transaction
+    public function getTransactionByGateway(Gateway $payrexxGateway, string $salesChannelId): ?\Payrexx\Models\Response\Transaction
     {
         if (!in_array($payrexxGateway->getStatus(), [Transaction::CONFIRMED, Transaction::WAITING])) {
             return null;
@@ -181,7 +134,7 @@ class PayrexxApiService
         return $this->getPayrexxTransaction(end($transactions)['id'], $salesChannelId);
     }
 
-    public function getPayrexxTransaction(int $payrexxTransactionId, $salesChannelId): ?\Payrexx\Models\Response\Transaction
+    public function getPayrexxTransaction(int $payrexxTransactionId, string $salesChannelId): ?\Payrexx\Models\Response\Transaction
     {
         $payrexx = $this->getInterface($salesChannelId);
 
@@ -198,10 +151,6 @@ class PayrexxApiService
 
     /**
      * Delete the payrexx gateway
-     *
-     * @param string $salesChannelId
-     * @param int $gatewayId
-     * @return bool
      */
     public function deletePayrexxGateway(string $salesChannelId, int $gatewayId): bool
     {
