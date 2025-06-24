@@ -30,20 +30,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class Cancel
 {
 
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected ContainerInterface $container;
+    protected TransactionHandler $transactionHandler;
 
-    /**
-     * @var TransactionHandler
-     */
-    protected $transactionHandler;
-
-    /**
-     * @param ContainerInterface $container
-     * @param TransactionHandler $transactionHandler
-     */
     public function __construct(
         ContainerInterface $container,
         TransactionHandler $transactionHandler

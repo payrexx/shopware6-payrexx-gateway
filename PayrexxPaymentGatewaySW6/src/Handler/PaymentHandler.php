@@ -125,21 +125,23 @@ class PaymentHandler extends AbstractPaymentHandler
         }
 
         // Delete gateway from all transactions.
-        foreach($order->getTransactions() as $transactionGateway) {
-            $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
-            if ($oldGatewayId) {
-                $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
-                    $salesChannelId,
-                    (int) $oldGatewayId
-                );
-                if ($gatewayStatus) {
-                    $this->transactionHandler->saveTransactionCustomFields(
-                        $context,
-                        $transactionGateway->getId(),
-                        [
-                            'gateway_id' => '',
-                        ]
+        if (!empty($order->getTransactions())) {
+            foreach($order->getTransactions() as $transactionGateway) {
+                $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
+                if ($oldGatewayId) {
+                    $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
+                        $salesChannelId,
+                        (int) $oldGatewayId
                     );
+                    if ($gatewayStatus) {
+                        $this->transactionHandler->saveTransactionCustomFields(
+                            $context,
+                            $transactionGateway->getId(),
+                            [
+                                'gateway_id' => '',
+                            ]
+                        );
+                    }
                 }
             }
         }
