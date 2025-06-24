@@ -188,11 +188,14 @@ class PaymentHandler extends AbstractPaymentHandler
      */
     public function finalize(
         Request $request,
-        PaymentTransactionStruct $ShopwareTransaction,
+        PaymentTransactionStruct $shopwareTransaction,
         Context $context,
     ): void  {
 
-        [$orderTransaction, $order] = $this->fetchOrderTransaction($transaction->getOrderTransactionId(), $context);
+        if (!$shopwareTransaction) {
+            return;
+        }
+        [$orderTransaction, $order] = $this->fetchOrderTransaction($shopwareTransaction->getOrderTransactionId(), $context);
         $salesChannelId = $order->getSalesChannelId();
         $transactionId = $orderTransaction->getId();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
@@ -228,10 +231,6 @@ class PaymentHandler extends AbstractPaymentHandler
         $payrexxTransactionStatus = $payrexxTransaction->getStatus();
         if ($totalAmount <= 0) {
             $payrexxTransactionStatus = Transaction::CONFIRMED;
-        }
-
-        if (!$ShopwareTransaction) {
-            return;
         }
         $this->transactionHandler->handleTransactionStatus($orderTransaction, $payrexxTransactionStatus, $context);
 
