@@ -1,7 +1,7 @@
 # Changelog
 
 ## [1.0.49]
-### Feature
+### Fixed
 - Fixed payment status unconfirmed.
 
 ## [1.0.48]
