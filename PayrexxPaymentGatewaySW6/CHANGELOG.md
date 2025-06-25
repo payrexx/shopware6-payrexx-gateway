@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.49]
+### Feature
+- Fixed payment status unconfirmed.
+
 ## [1.0.48]
 ### Feature
 - Added a new payment method for CembraPay.

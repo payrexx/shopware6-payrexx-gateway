@@ -83,8 +83,8 @@ class TransactionHandler
             case OrderTransactionStates::STATE_UNCONFIRMED:
                 if (OrderTransactionStates::STATE_OPEN === $state->getTechnicalName()) {
                     $this->transactionStateHandler->processUnconfirmed($orderTransaction->getId(), $context);
-                    break;
                 }
+                break;
             case Transaction::CONFIRMED:
                 if ($state !== null && OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()) break;
                 $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
