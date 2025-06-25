@@ -2,6 +2,10 @@
 
 ## [2.0.0]
 ### Feature
+- Support for Shopware 6.7
+
+## [1.0.49]
+### Feature
 - Fixed payment status unconfirmed.
 
 ## [1.0.48]
