@@ -133,6 +133,9 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $order = $transaction->getOrder();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
+        // Convert to cents and round for further usage
+        $totalAmount = intval($totalAmount * 100);
+
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
             $redirectUrl = $transaction->getReturnUrl();
@@ -160,6 +163,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $basket = $this->collectBasketData($order, $salesChannelContext);
         $purpose = $this->createPurposeByBasket($basket);
         $basketAmount = $this->getBasketAmount($basket);
+
+        // Compare with rounded totals to check if basket is correct
         if ($totalAmount !== $basketAmount) {
             $basket = [];
         }
@@ -383,15 +388,15 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
      * @param $basket
      * @return float
      */
-    private function getBasketAmount($basket): float
+    private function getBasketAmount($basket): int
     {
         $basketAmount = 0;
 
         foreach ($basket as $product) {
-            $amount = $product['amount'] / 100;
+            $amount = $product['amount'];
             $basketAmount += $product['quantity'] * $amount;
         }
-        return floatval($basketAmount);
+        return intval($basketAmount);
     }
 
     /**
