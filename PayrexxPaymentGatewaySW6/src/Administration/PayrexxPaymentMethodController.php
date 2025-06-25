@@ -2,17 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PayrexxPaymentGateway\Controller;
+namespace PayrexxPaymentGateway\Administration;
 
-use PayrexxPaymentGateway\Handler\PaymentHandler;
-use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Symfony\Component\Routing\Annotation\Route;
-
 use Shopware\Core\Framework\Context;
-use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -20,29 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
  * @Route(defaults={"_routeScope"={"api"}})
  */
 #[Route(defaults: ['_routeScope' => ['api']])]
-class SettingsController extends AbstractController
+class PayrexxPaymentMethodController
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $containerInterface;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @param LoggerInterface $logger
-     **/
-    public function __construct(
-        ContainerInterface $containerInterface,
-        LoggerInterface $logger
-    ) {
-        $this->containerInterface = $containerInterface;
-        $this->logger = $logger;
-    }
-
     /**
      * @Route("/api/_action/payrexx_payment/validate-api-credentials", name="api.action.payrexx_payment.validate.api.credentials", methods={"POST"})
      * @throws \Payrexx\PayrexxException
@@ -60,7 +32,7 @@ class SettingsController extends AbstractController
 
         $error = '';
         try {
-            $response = $payrexx->getOne($signatureCheck);
+            $payrexx->getOne($signatureCheck);
         } catch(\Payrexx\PayrexxException $e) {
             $error = $e;
         }

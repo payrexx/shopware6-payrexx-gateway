@@ -4,43 +4,23 @@ namespace PayrexxPaymentGateway\Service;
 
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
-use Shopware\Core\System\SystemConfig\SystemConfigEntity;
 
 class ConfigService
 {
     const PLUGIN_CONFIG_DOMAIN = 'PayrexxPaymentGatewaySW6.settings.';
 
-    /**
-     * @var EntityRepository
-     */
-    protected $systemConfigRepository;
+    protected EntityRepository $systemConfigRepository;
+    protected LoggerInterface $logger;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * Constructor
-     *
-     * @param EntityRepository $systemConfigRepository
-     * @param LoggerInterface $logger
-     */
     public function __construct(EntityRepository $systemConfigRepository, LoggerInterface $logger)
     {
         $this->systemConfigRepository = $systemConfigRepository;
         $this->logger = $logger;
     }
 
-    /**
-     * Returns the Plugin configurations
-     * @param string $requestSalesChannelId
-     * @return array
-     */
     public function getPluginConfiguration(string $requestSalesChannelId): array
     {
         require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';

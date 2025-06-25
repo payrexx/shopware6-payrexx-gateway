@@ -16,6 +16,7 @@ use Shopware\Core\Framework\Plugin\Util\PluginIdProvider;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\Uuid\Uuid;
 
 class PaymentMethodInstaller implements InstallerInterface
 {
@@ -519,11 +520,8 @@ class PaymentMethodInstaller implements InstallerInterface
         ],
     ];
 
-    /** @var EntityRepository */
-    private $paymentMethodRepository;
-
-    /** @var PluginIdProvider */
-    private $pluginIdProvider;
+    private EntityRepository $paymentMethodRepository;
+    private PluginIdProvider $pluginIdProvider;
 
     public function __construct(
         EntityRepository $paymentMethodRepository,
@@ -572,22 +570,8 @@ class PaymentMethodInstaller implements InstallerInterface
         foreach (self::PAYMENT_METHODS as $payrexxPaymentMethodIdentifier => $payrexxPaymentMethod) {
             $this->upsertPaymentMethod($context->getContext(), $payrexxPaymentMethod, $payrexxPaymentMethodIdentifier);
         }
-
-        $unAvailablePaymentMethods = [
-            'sofortueberweisung_de',
-            'postfinance_card',
-            'postfinance_efinance',
-        ];
-        foreach ($unAvailablePaymentMethods as $payrexxPaymentMethodIdentifier) {
-            $this->upsertPaymentMethod($context->getContext(), [], $payrexxPaymentMethodIdentifier);
-        }
     }
 
-    /**
-     * @param Context $context
-     * @param array $paymentMethod
-     * @return void
-     */
     private function upsertPaymentMethod(Context $context, array $payrexxPaymentMethod, string $payrexxPaymentMethodIdentifier): void
     {
         $pluginId = $this->pluginIdProvider->getPluginIdByBaseClass(PayrexxPaymentGatewaySW6::class, $context);
@@ -607,31 +591,8 @@ class PaymentMethodInstaller implements InstallerInterface
             $paymentMethodActive = $paymentMethod->getActive();
         }
 
-        // TO DO: Remove later releases.
-        if ($paymentMethodId &&
-            in_array($payrexxPaymentMethodIdentifier, [
-                'sofortueberweisung_de',
-                'postfinance_card',
-                'postfinance_efinance',
-            ])
-        ) {
-            $this->setPaymentMethodIsActive($context, $paymentMethodId, false);
-            return;
-        }
-
-        // TO DO: Remove later releases.
-        if (!$paymentMethodId && $payrexxPaymentMethodIdentifier == 'post-finance-pay') {
-            $paymentMethodActive = false;
-            foreach(['postfinance_card', 'postfinance_efinance'] as $paymentMethod) {
-                if ($this->IsPaymentMethodActive($paymentMethod)) {
-                    $paymentMethodActive = true;
-                    break;
-                }
-            }
-        }
-
         $options = [
-            'id' => $paymentMethodId,
+            'id' => $paymentMethodId ?? Uuid::randomHex(),
             'handlerIdentifier' => PaymentHandler::class,
             'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
@@ -652,33 +613,12 @@ class PaymentMethodInstaller implements InstallerInterface
         });
     }
 
-    /**
-     * @param Context $context
-     * @param int $paymentMethodId
-     * @param boolean $active
-     * @return void
-     */
-    private function setPaymentMethodIsActive($context, $paymentMethodId, $active)
+    private function setPaymentMethodIsActive(Context $context, $paymentMethodId, bool $active): void
     {
         $paymentMethod = [
             'id' => $paymentMethodId,
             'active' => $active,
         ];
         $this->paymentMethodRepository->update([$paymentMethod], $context);
-    }
-
-    private function IsPaymentMethodActive(string $payrexxPaymentMethodIdentifier): bool
-    {
-        $criteria = (new Criteria())
-            ->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class))
-            ->addFilter(new EqualsFilter('customFields.payrexx_payment_method_name', PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier))
-            ->setLimit(1);
-        $paymentMethods = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
-
-        if ($paymentMethods->count()){
-            $paymentMethod = $paymentMethods->getEntities()->first();
-            return $paymentMethod->getActive();
-        }
-        return false;
     }
 }

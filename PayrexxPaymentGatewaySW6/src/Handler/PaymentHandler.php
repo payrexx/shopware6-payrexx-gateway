@@ -17,85 +17,37 @@ use Shopware\Core\Framework\Context;
 use Symfony\Component\HttpFoundation\Request;
 use PayrexxPaymentGateway\Service\CustomerService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymentException;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
+use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AbstractPaymentHandler;
 use Shopware\Core\Checkout\Payment\PaymentException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerType;
+use Shopware\Core\Framework\Struct\Struct;
+use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
 
-class PaymentHandler implements AsynchronousPaymentHandlerInterface
+class PaymentHandler extends AbstractPaymentHandler
 {
 
     const PAYMENT_METHOD_PREFIX = 'payrexx_payment_';
     const BASE_URL = 'payrexx.com';
 
-    /**
-     * @var OrderTransactionStateHandler
-     */
-    protected $transactionStateHandler;
+    protected OrderTransactionStateHandler $transactionStateHandler;
+    protected ContainerInterface $container;
+    protected ConfigService $configService;
+    protected CustomerService $customerService;
+    protected PayrexxApiService $payrexxApiService;
+    protected TransactionHandler $transactionHandler;
+    protected LoggerInterface $logger;
+    protected RouterInterface $router;
+    protected RequestStack $requestStack;
 
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var ConfigService
-     */
-    protected $configService;
-
-    /**
-     * @var CustomerService
-     */
-    protected $customerService;
-
-    /**
-     * @var PayrexxApiService
-     */
-    protected $payrexxApiService;
-
-    /**
-     * @var TransactionHandler
-     */
-    protected $transactionHandler;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var RouterInterface
-     */
-    protected $router;
-
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
-
-    /**
-     * @param OrderTransactionStateHandler $transactionStateHandler
-     * @param ContainerInterface $container
-     * @param CustomerService $customerService
-     * @param PayrexxApiService $payrexxApiService
-     * @param TransactionHandler $transactionHandler
-     * @param ConfigService $configService
-     * @param LoggerInterface $logger
-     * @param RouterInterface $router
-     * @param RequestStack $requestStack
-     */
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
         ContainerInterface $container,
@@ -118,19 +70,14 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $this->requestStack = $requestStack;
     }
 
-    /**
-     * Redirects to the payment page
-     *
-     * @param AsyncPaymentTransactionStruct $transaction
-     * @param RequestDataBag $dataBag
-     * @param SalesChannelContext $salesChannelContext
-     * @return RedirectResponse
-     * @throws AsyncPaymentProcessException
-     */
-    public function pay(AsyncPaymentTransactionStruct $transaction, RequestDataBag $dataBag, SalesChannelContext $salesChannelContext): RedirectResponse
-    {
-        $orderTransaction = $transaction->getOrderTransaction();
-        $order = $transaction->getOrder();
+    public function pay(
+        Request $request,
+        PaymentTransactionStruct $transaction,
+        Context $context,
+        ?Struct $validateStruct
+    ): ?RedirectResponse {
+
+        [$orderTransaction, $order] = $this->fetchOrderTransaction($transaction->getOrderTransactionId(), $context);
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
         // Convert to cents and round for further usage
@@ -142,14 +89,14 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             return new RedirectResponse($redirectUrl);
         }
 
-        $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
+        $salesChannelId = $order->getSalesChannelId();
         $transactionId = $orderTransaction->getId();
 
         $paymentMethodRepo = $this->container->get('payment_method.repository');
         $paymentCriteria = (new Criteria())->addFilter(
             new EqualsFilter('id', $orderTransaction->getPaymentMethodId())
         );
-        $paymentMethod = $paymentMethodRepo->search($paymentCriteria, $salesChannelContext->getContext())->first();
+        $paymentMethod = $paymentMethodRepo->search($paymentCriteria, $context)->first();
         $customFields = isset($paymentMethod->getTranslated()['customFields']) ? $paymentMethod->getTranslated()['customFields'] : [];
 
         $paymentMethodName = '';
@@ -160,7 +107,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         $paymentMean = str_replace(self::PAYMENT_METHOD_PREFIX, '', $paymentMethodName);
 
-        $basket = $this->collectBasketData($order, $salesChannelContext);
+        $basket = $this->collectBasketData($order, $context);
         $purpose = $this->createPurposeByBasket($basket);
         $basketAmount = $this->getBasketAmount($basket);
 
@@ -178,29 +125,26 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
 
         // Delete gateway from all transactions.
-        foreach($order->getTransactions() as $transactionGateway) {
-            $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
-            if ($oldGatewayId) {
-                $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
-                    $salesChannelId,
-                    (int) $oldGatewayId
-                );
-                if ($gatewayStatus) {
-                    $this->transactionHandler->saveTransactionCustomFields(
-                        $salesChannelContext,
-                        $transactionGateway->getId(),
-                        [
-                            'gateway_id' => '',
-                        ]
+        if (!empty($order->getTransactions())) {
+            foreach($order->getTransactions() as $transactionGateway) {
+                $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
+                if ($oldGatewayId) {
+                    $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
+                        $salesChannelId,
+                        (int) $oldGatewayId
                     );
+                    if ($gatewayStatus) {
+                        $this->transactionHandler->saveTransactionCustomFields(
+                            $context,
+                            $transactionGateway->getId(),
+                            [
+                                'gateway_id' => '',
+                            ]
+                        );
+                    }
                 }
             }
         }
-
-        if (in_array($paymentMean, ['sofortueberweisung_de', 'postfinance_card', 'postfinance_efinance'])) {
-            throw new Exception('Unavailable payment method error');
-        }
-
         $returnUrl = $this->createReturnUrl(
             $transaction,
             $order->getOrderNumber(),
@@ -212,7 +156,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                 $order->getOrderNumber(),
                 $totalAmount,
                 $averageVatRate,
-                $salesChannelContext->getCurrency()->getIsoCode(),
+                $order->getCurrency()->getIsoCode(),
                 $paymentMean,
                 $billingAndShippingDetails,
                 $returnUrl,
@@ -224,11 +168,11 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             if (!$payrexxGateway) {
                 throw new Exception('Gateway creation error');
             }
-            $this->transactionHandler->saveTransactionCustomFields($salesChannelContext, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
+            $this->transactionHandler->saveTransactionCustomFields($context, $transactionId, ['gateway_id' => $payrexxGateway->getId()]);
             $this->transactionHandler->handleTransactionStatus(
                 $orderTransaction,
                 OrderTransactionStates::STATE_UNCONFIRMED,
-                $salesChannelContext->getContext()
+                $context
             );
             $redirectUrl = $payrexxGateway->getLink();
         } catch (\Exception $e) {
@@ -240,17 +184,19 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
     }
 
     /**
-     * @param AsyncPaymentTransactionStruct $transaction
-     * @param Request $request
-     * @param SalesChannelContext $salesChannelContext
      * @throws PaymentException|CustomerCanceledAsyncPaymentException
      */
-    public function finalize(AsyncPaymentTransactionStruct $shopwareTransaction, Request $request, SalesChannelContext $salesChannelContext): void
-    {
-        $context = $salesChannelContext->getContext();
-        $salesChannelId = $salesChannelContext->getSalesChannel()->getId();
+    public function finalize(
+        Request $request,
+        PaymentTransactionStruct $shopwareTransaction,
+        Context $context,
+    ): void  {
 
-        $orderTransaction = $shopwareTransaction->getOrderTransaction();
+        if (!$shopwareTransaction) {
+            return;
+        }
+        [$orderTransaction, $order] = $this->fetchOrderTransaction($shopwareTransaction->getOrderTransactionId(), $context);
+        $salesChannelId = $order->getSalesChannelId();
         $transactionId = $orderTransaction->getId();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
@@ -272,7 +218,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
         $gatewayIds = explode(',', (string) $gatewayId); // TODO: later remove explode.
         $gatewayId = current($gatewayIds);
-        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway($gatewayId, $salesChannelId);
+        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway((int) $gatewayId, $salesChannelId);
         $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId);
 
         if (!$payrexxTransaction && $totalAmount > 0) {
@@ -286,10 +232,6 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         if ($totalAmount <= 0) {
             $payrexxTransactionStatus = Transaction::CONFIRMED;
         }
-
-        if (!$shopwareTransaction) {
-            return;
-        }
         $this->transactionHandler->handleTransactionStatus($orderTransaction, $payrexxTransactionStatus, $context);
 
         if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::DECLINED, Transaction::EXPIRED, Transaction::ERROR])){
@@ -298,7 +240,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
     }
 
-    private function collectBasketData(OrderEntity $order, $salesChannelContext):array
+    private function collectBasketData(OrderEntity $order, $context):array
     {
         // Collect basket data
         $basket = [];
@@ -330,7 +272,7 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
             $shippingCriteria = (new Criteria())->addFilter(
                 new EqualsFilter('id', $delivery->getShippingMethodId())
             );
-            $shippingMethod = $shippingMethodRepo->search($shippingCriteria, $salesChannelContext->getContext())->first();
+            $shippingMethod = $shippingMethodRepo->search($shippingCriteria, $context)->first();
 
             $unitPrice = $delivery->getShippingCosts()->getUnitPrice() ;
             $quantity = $delivery->getShippingCosts()->getQuantity();
@@ -384,11 +326,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
     /**
      * Get total amount of basket items
-     *
-     * @param $basket
-     * @return float
      */
-    private function getBasketAmount($basket): int
+    private function getBasketAmount(array $basket): int
     {
         $basketAmount = 0;
 
@@ -401,11 +340,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
 
     /**
      * Create purpose from basket items
-     *
-     * @param array $basket
-     * @return string
      */
-    public static function createPurposeByBasket($basket): string
+    public static function createPurposeByBasket(array $basket): string
     {
         $desc = [];
         foreach ($basket as $product) {
@@ -449,16 +385,8 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
         }
     }
 
-    /**
-     * Build return url
-     *
-     * @param AsyncPaymentTransactionStruct $transaction
-     * @param string $orderNumber
-     * @param string $transactionId
-     * @return array
-     */
     private function createReturnUrl(
-        AsyncPaymentTransactionStruct $transaction,
+        PaymentTransactionStruct $transaction,
         string $orderNumber,
         string $transactionId
     ): array {
@@ -482,5 +410,29 @@ class PaymentHandler implements AsynchronousPaymentHandlerInterface
                     UrlGeneratorInterface::ABSOLUTE_URL
                 ),
         ];
+    }
+
+    public function supports(PaymentHandlerType $type, string $paymentMethodId, Context $context): bool
+    {
+        return true;
+    }
+
+    private function fetchOrderTransaction(string $transactionId, Context $context): array
+    {
+        $criteria = new Criteria([$transactionId]);
+        $criteria->addAssociation('order.billingAddress.country');
+        $criteria->addAssociation('order.currency');
+        $criteria->addAssociation('order.deliveries.shippingOrderAddress.country');
+        $criteria->addAssociation('order.lineItems');
+        $criteria->addAssociation('order.orderCustomer.customer');
+        $criteria->addAssociation('order.salesChannel');
+
+        $transaction = $this->container->get('order_transaction.repository')->search($criteria, $context)->first();
+        \assert($transaction instanceof OrderTransactionEntity);
+
+        $order = $transaction->getOrder();
+        \assert($order instanceof OrderEntity);
+
+        return [$transaction, $order];
     }
 }

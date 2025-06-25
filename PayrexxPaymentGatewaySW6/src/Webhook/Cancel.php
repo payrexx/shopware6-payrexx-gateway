@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -31,20 +30,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class Cancel
 {
 
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected ContainerInterface $container;
+    protected TransactionHandler $transactionHandler;
 
-    /**
-     * @var TransactionHandler
-     */
-    protected $transactionHandler;
-
-    /**
-     * @param ContainerInterface $container
-     * @param TransactionHandler $transactionHandler
-     */
     public function __construct(
         ContainerInterface $container,
         TransactionHandler $transactionHandler
@@ -60,10 +48,6 @@ class Cancel
      *     methods={"GET"},
      *     defaults={"csrf_protected"=false}
      * )
-     *
-     * @param Request $request
-     * @param Context $context
-     * @return Response
      */
     #[Route(path: '/payrexx-payment/cancel', name: 'frontend.payrexx-payment.cancel', methods: ['GET'], defaults: ['csrf_protected' => false])]
     public function executeCancel(Request $request, Context $context): Response

@@ -3,13 +3,11 @@
 namespace PayrexxPaymentGateway\Subscriber;
 
 use PayrexxPaymentGateway\Service\PayrexxApiService;
-use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
 use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryEntity;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Exception\InconsistentCriteriaIdsException;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Checkout\Order\OrderDefinition;
 use Shopware\Core\Checkout\Order\OrderEvents;
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -17,12 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class BackendSubscriber implements EventSubscriberInterface
 {
-    private $container;
-
-    /**
-     * @var PayrexxApiService
-     */
-    protected $payrexxApiService;
+    private ContainerInterface $container;
+    private PayrexxApiService $payrexxApiService;
 
     public function __construct(ContainerInterface $container,  PayrexxApiService $payrexxApiService)
     {
@@ -92,7 +86,7 @@ class BackendSubscriber implements EventSubscriberInterface
             }
 
             $gatewayIds = explode(',', (string) $transactionCustomFields['gateway_id']);
-            if (!$payrexxGateway = $this->payrexxApiService->getPayrexxGateway(current($gatewayIds), $salesChannelId)) {
+            if (!$payrexxGateway = $this->payrexxApiService->getPayrexxGateway((int) current($gatewayIds), $salesChannelId)) {
                 continue;
             }
             if (!$payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId)) {

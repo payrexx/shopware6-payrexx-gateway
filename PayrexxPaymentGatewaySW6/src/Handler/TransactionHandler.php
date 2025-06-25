@@ -9,79 +9,41 @@ use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEntity;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates;
 use Shopware\Core\Framework\Context;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
-use Shopware\Core\Checkout\Payment\Cart\AsyncPaymentTransactionStruct;
-use Shopware\Core\Checkout\Payment\Exception\AsyncPaymentProcessException;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepositoryInterface;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
-use Shopware\Core\Checkout\Payment\Exception\CustomerCanceledAsyncPaymentException;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
-use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\AsynchronousPaymentHandlerInterface;
 
 class TransactionHandler
 {
-    /**
-     * @var OrderTransactionStateHandler
-     */
-    protected $transactionStateHandler;
+    protected OrderTransactionStateHandler $transactionStateHandler;
+    protected ContainerInterface $container;
+    protected LoggerInterface $logger;
 
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @param OrderTransactionStateHandler $transactionStateHandler
-     * * @param ContainerInterface $container
-     * @param type $logger
-     */
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
         ContainerInterface $container,
-        $logger
+        LoggerInterface $logger
     ) {
         $this->transactionStateHandler = $transactionStateHandler;
         $this->container = $container;
         $this->logger = $logger;
     }
 
-    /**
-     * @param $payrexxGateway
-     * @param $salesChannelContext
-     * @param $transactionId
-     */
-    public function saveTransactionCustomFields($salesChannelContext, $transactionId, $details)
+    public function saveTransactionCustomFields(Context $context, string $transactionId, array $details): void
     {
         $transactionRepo = $this->container->get('order_transaction.repository');
 
         $transactionRepo->upsert([[
             'id' => $transactionId,
             'customFields' => $details
-        ]], $salesChannelContext->getContext());
+        ]], $context);
     }
 
-    /**
-     * @param OrderTransactionEntity $transaction
-     * @param $payrexxTransactionStatus
-     * @param Context $context
-     */
-    public function handleTransactionStatus(OrderTransactionEntity $orderTransaction, string $payrexxTransactionStatus, Context $context)
+    public function handleTransactionStatus(OrderTransactionEntity $orderTransaction, string $payrexxTransactionStatus, Context $context): void
     {
         $state = $orderTransaction->getStateMachineState();
         switch ($payrexxTransactionStatus) {
             case OrderTransactionStates::STATE_UNCONFIRMED:
-                if (OrderTransactionStates::STATE_OPEN === $state->getTechnicalName()) {
+                if ($state !== null && OrderTransactionStates::STATE_OPEN === $state->getTechnicalName()) {
                     $this->transactionStateHandler->processUnconfirmed($orderTransaction->getId(), $context);
                 }
                 break;
