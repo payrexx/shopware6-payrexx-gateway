@@ -126,22 +126,32 @@ class PaymentHandler extends AbstractPaymentHandler
 
         // Delete gateway from all transactions.
         if (!empty($order->getTransactions())) {
-            foreach($order->getTransactions() as $transactionGateway) {
-                $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
-                if ($oldGatewayId) {
-                    $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
-                        $salesChannelId,
+            foreach ($order->getTransactions() as $transactionGateway) {
+                $customFields = $transactionGateway->getCustomFields() ?? [];
+                $oldGatewayIds = $customFields['gateway_id'] ?? '';
+
+                if (empty($oldGatewayIds)) {
+                    continue;
+                }
+
+                $gatewayIds = array_filter(explode(',', (string) $oldGatewayIds));
+                $oldGatewayId = current($gatewayIds);
+
+                if (!$oldGatewayId) {
+                    continue;
+                }
+
+                $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
+                    $salesChannelId,
+                    (int) $oldGatewayId
+                );
+
+                if ($gatewayStatus) {
+                    $this->transactionHandler->removeGatewayId(
+                        $context,
+                        $transactionGateway->getId(),
                         (int) $oldGatewayId
                     );
-                    if ($gatewayStatus) {
-                        $this->transactionHandler->saveTransactionCustomFields(
-                            $context,
-                            $transactionGateway->getId(),
-                            [
-                                'gateway_id' => '',
-                            ]
-                        );
-                    }
                 }
             }
         }
@@ -426,6 +436,7 @@ class PaymentHandler extends AbstractPaymentHandler
         $criteria->addAssociation('order.lineItems');
         $criteria->addAssociation('order.orderCustomer.customer');
         $criteria->addAssociation('order.salesChannel');
+        $criteria->addAssociation('order.transactions');
 
         $transaction = $this->container->get('order_transaction.repository')->search($criteria, $context)->first();
         \assert($transaction instanceof OrderTransactionEntity);

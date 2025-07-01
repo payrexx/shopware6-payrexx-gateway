@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.1]
+### Fixed
+- Delete payment gateway and manage gateway ids.
+
 ## [2.0.0]
 ### Feature
 - Support for Shopware 6.7

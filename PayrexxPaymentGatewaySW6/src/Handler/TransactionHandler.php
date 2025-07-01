@@ -10,6 +10,7 @@ use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionEnti
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStateHandler;
 
 class TransactionHandler
@@ -32,9 +33,56 @@ class TransactionHandler
     {
         $transactionRepo = $this->container->get('order_transaction.repository');
 
+        // Manage existing gateway ids.Add commentMore actions
+        $criteria = new Criteria([$transactionId]);
+        $criteria->addAssociation('customFields');
+        $transaction = $transactionRepo->search($criteria, $context)->first();
+        if (!$transaction) {
+           return;
+        }
+
+        $customFields = $transaction->getCustomFields() ?? [];
+        $gatewayIds = $customFields['gateway_id'] ?? '';
+
+        if (!empty($gatewayIds)) {
+            // Save new gateway id first.
+            $newGatewayId = $details['gateway_id'] . ',' . $gatewayIds;
+            $newGatewayIds = array_slice(explode(',', $newGatewayId), 0, 10);
+            $details['gateway_id'] = implode(',', $newGatewayIds);
+        }
+
         $transactionRepo->upsert([[
             'id' => $transactionId,
             'customFields' => $details
+        ]], $context);
+    }
+
+    public function removeGatewayId(Context $context, string $transactionId, int $gatewayId): void
+    {
+        $transactionRepo = $this->container->get('order_transaction.repository');
+
+        $criteria = new Criteria([$transactionId]);
+        $criteria->addAssociation('customFields');
+        $transaction = $transactionRepo->search($criteria, $context)->first();
+        if (!$transaction) {
+           return;
+        }
+
+        $customFields = $transaction->getCustomFields() ?? [];
+        $existingGatewayIds = $customFields['gateway_id'] ?? '';
+
+        $gatewayIdArray = $existingGatewayIds !== '' ? explode(',', $existingGatewayIds) : [];
+        $filteredIds = array_filter($gatewayIdArray, fn($id) => $id !== (string) $gatewayId);
+
+        // If no change, avoid unnecessary upsert
+        if (implode(',', $gatewayIdArray) === implode(',', $filteredIds)) {
+            return;
+        }
+
+        $customFields['gateway_id'] = implode(',', array_values($filteredIds));
+        $transactionRepo->upsert([[
+            'id' => $transactionId,
+            'customFields' => $customFields,
         ]], $context);
     }
 
