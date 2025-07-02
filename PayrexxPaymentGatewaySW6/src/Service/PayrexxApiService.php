@@ -174,9 +174,7 @@ class PayrexxApiService
                     // no action.
                 }
             }
-            if ($transaction && !in_array($transaction->getStatus(), [Transaction::CONFIRMED, Transaction::WAITING])) {
-                return true; // Delete from shopware only.
-            }
+
         }
         return false;
     }

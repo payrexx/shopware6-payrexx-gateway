@@ -126,22 +126,32 @@ class PaymentHandler extends AbstractPaymentHandler
 
         // Delete gateway from all transactions.
         if (!empty($order->getTransactions())) {
-            foreach($order->getTransactions() as $transactionGateway) {
-                $oldGatewayId = $transactionGateway->getCustomFields()['gateway_id'] ?? '';
-                if ($oldGatewayId) {
-                    $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
-                        $salesChannelId,
+            foreach ($order->getTransactions() as $transactionGateway) {
+                $customFields = $transactionGateway->getCustomFields() ?? [];
+                $oldGatewayIds = $customFields['gateway_id'] ?? '';
+
+                if (empty($oldGatewayIds)) {
+                    continue;
+                }
+
+                $gatewayIds = array_filter(explode(',', (string) $oldGatewayIds));
+                $oldGatewayId = current($gatewayIds);
+
+                if (!$oldGatewayId) {
+                    continue;
+                }
+
+                $gatewayStatus = $this->payrexxApiService->deletePayrexxGateway(
+                    $salesChannelId,
+                    (int) $oldGatewayId
+                );
+
+                if ($gatewayStatus) {
+                    $this->transactionHandler->removeGatewayId(
+                        $context,
+                        $transactionGateway->getId(),
                         (int) $oldGatewayId
                     );
-                    if ($gatewayStatus) {
-                        $this->transactionHandler->saveTransactionCustomFields(
-                            $context,
-                            $transactionGateway->getId(),
-                            [
-                                'gateway_id' => '',
-                            ]
-                        );
-                    }
                 }
             }
         }
@@ -196,16 +206,18 @@ class PaymentHandler extends AbstractPaymentHandler
             return;
         }
         [$orderTransaction, $order] = $this->fetchOrderTransaction($shopwareTransaction->getOrderTransactionId(), $context);
-        $salesChannelId = $order->getSalesChannelId();
+
+        // skip process if already paid.
+        if ($orderTransaction->getStateMachineState() &&
+            OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()
+        ) {
+            return;
+        }
+
         $transactionId = $orderTransaction->getId();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
         if ($totalAmount <= 0) {
-            if ($orderTransaction->getStateMachineState() &&
-                OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()
-            ) {
-                return;
-            }
             $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
             return;
         }
@@ -215,29 +227,6 @@ class PaymentHandler extends AbstractPaymentHandler
         if (empty($gatewayId)) {
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }
-
-        $gatewayIds = explode(',', (string) $gatewayId); // TODO: later remove explode.
-        $gatewayId = current($gatewayIds);
-        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway((int) $gatewayId, $salesChannelId);
-        $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId);
-
-        if (!$payrexxTransaction && $totalAmount > 0) {
-            if ($gatewayId) {
-                $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $gatewayId);
-            }
-            $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
-        }
-
-        $payrexxTransactionStatus = $payrexxTransaction->getStatus();
-        if ($totalAmount <= 0) {
-            $payrexxTransactionStatus = Transaction::CONFIRMED;
-        }
-        $this->transactionHandler->handleTransactionStatus($orderTransaction, $payrexxTransactionStatus, $context);
-
-        if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::DECLINED, Transaction::EXPIRED, Transaction::ERROR])){
-            return;
-        }
-        $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
     }
 
     private function collectBasketData(OrderEntity $order, $context):array
@@ -426,6 +415,7 @@ class PaymentHandler extends AbstractPaymentHandler
         $criteria->addAssociation('order.lineItems');
         $criteria->addAssociation('order.orderCustomer.customer');
         $criteria->addAssociation('order.salesChannel');
+        $criteria->addAssociation('order.transactions');
 
         $transaction = $this->container->get('order_transaction.repository')->search($criteria, $context)->first();
         \assert($transaction instanceof OrderTransactionEntity);
