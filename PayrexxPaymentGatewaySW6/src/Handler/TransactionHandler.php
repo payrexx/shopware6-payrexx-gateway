@@ -47,7 +47,7 @@ class TransactionHandler
         if (!empty($gatewayIds)) {
             // Save new gateway id first.
             $newGatewayId = $details['gateway_id'] . ',' . $gatewayIds;
-            $newGatewayIds = array_slice(explode(',', $newGatewayId), 0, 10);
+            $newGatewayIds = array_slice(explode(',', (string) $newGatewayId), 0, 10);
             $details['gateway_id'] = implode(',', $newGatewayIds);
         }
 
@@ -71,7 +71,7 @@ class TransactionHandler
         $customFields = $transaction->getCustomFields() ?? [];
         $existingGatewayIds = $customFields['gateway_id'] ?? '';
 
-        $gatewayIdArray = $existingGatewayIds !== '' ? explode(',', $existingGatewayIds) : [];
+        $gatewayIdArray = $existingGatewayIds !== '' ? explode(',', (string) $existingGatewayIds) : [];
         $filteredIds = array_filter($gatewayIdArray, fn($id) => $id !== (string) $gatewayId);
 
         // If no change, avoid unnecessary upsert

@@ -206,16 +206,18 @@ class PaymentHandler extends AbstractPaymentHandler
             return;
         }
         [$orderTransaction, $order] = $this->fetchOrderTransaction($shopwareTransaction->getOrderTransactionId(), $context);
-        $salesChannelId = $order->getSalesChannelId();
+
+        // skip process if already paid.
+        if ($orderTransaction->getStateMachineState() &&
+            OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()
+        ) {
+            return;
+        }
+
         $transactionId = $orderTransaction->getId();
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
         if ($totalAmount <= 0) {
-            if ($orderTransaction->getStateMachineState() &&
-                OrderTransactionStates::STATE_PAID === $orderTransaction->getStateMachineState()->getTechnicalName()
-            ) {
-                return;
-            }
             $this->transactionStateHandler->paid($orderTransaction->getId(), $context);
             return;
         }
@@ -225,29 +227,6 @@ class PaymentHandler extends AbstractPaymentHandler
         if (empty($gatewayId)) {
             $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
         }
-
-        $gatewayIds = explode(',', (string) $gatewayId); // TODO: later remove explode.
-        $gatewayId = current($gatewayIds);
-        $payrexxGateway = $this->payrexxApiService->getPayrexxGateway((int) $gatewayId, $salesChannelId);
-        $payrexxTransaction = $this->payrexxApiService->getTransactionByGateway($payrexxGateway, $salesChannelId);
-
-        if (!$payrexxTransaction && $totalAmount > 0) {
-            if ($gatewayId) {
-                $this->payrexxApiService->deletePayrexxGateway($salesChannelId, (int) $gatewayId);
-            }
-            $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
-        }
-
-        $payrexxTransactionStatus = $payrexxTransaction->getStatus();
-        if ($totalAmount <= 0) {
-            $payrexxTransactionStatus = Transaction::CONFIRMED;
-        }
-        $this->transactionHandler->handleTransactionStatus($orderTransaction, $payrexxTransactionStatus, $context);
-
-        if (!in_array($payrexxTransactionStatus, [Transaction::CANCELLED, Transaction::DECLINED, Transaction::EXPIRED, Transaction::ERROR])){
-            return;
-        }
-        $this->customCustomerException($transactionId, 'Customer canceled the payment on the Payrexx page');
     }
 
     private function collectBasketData(OrderEntity $order, $context):array
