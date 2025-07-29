@@ -49,7 +49,7 @@ class Dispatcher
         ConfigService $configService,
         PayrexxApiService $payrexxApiService,
         TransactionHandler $transactionHandler,
-                                     $logger
+        LoggerInterface $logger
     )
     {
         $this->transactionStateHandler = $transactionStateHandler;
