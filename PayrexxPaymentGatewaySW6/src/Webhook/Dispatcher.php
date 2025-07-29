@@ -49,7 +49,7 @@ class Dispatcher
         ConfigService $configService,
         PayrexxApiService $payrexxApiService,
         TransactionHandler $transactionHandler,
-        $logger
+                                     $logger
     )
     {
         $this->transactionStateHandler = $transactionStateHandler;
@@ -91,7 +91,8 @@ class Dispatcher
                 $transactionDetails = $transactionRepo->search(
                     (new Criteria())
                         ->addFilter(new EqualsFilter('id', $swOrderNumber))
-                        ->addAssociation('order'),
+                        ->addAssociation('order')
+                        ->addAssociation('stateMachineState'),
                     $context
                 );
                 $order = $transactionDetails->first()->getOrder();
@@ -99,7 +100,8 @@ class Dispatcher
                 $orderDetails = $orderRepo->search(
                     (new Criteria())
                         ->addFilter(new EqualsFilter('orderNumber', $swOrderNumber))
-                        ->addAssociation('transactions'),
+                        ->addAssociation('transactions')
+                        ->addAssociation('transactions.stateMachineState'),
                     $context
                 );
                 $order = $orderDetails->first();
@@ -107,6 +109,12 @@ class Dispatcher
 
             $transaction = false;
             foreach($order->getTransactions() as $orderTransaction) {
+                // Check all transaction if has already paid
+                $state = $orderTransaction->getStateMachineState();
+
+                if ($state && $state->getTechnicalName() === OrderTransactionStates::STATE_PAID) {
+                    return new Response('Already Paid state', Response::HTTP_OK);
+                }
                 $savedGatewayIds = explode(',', (string) $orderTransaction->getCustomFields()['gateway_id']);
                 if (in_array($requestGatewayId, $savedGatewayIds)) {
                     $transaction = $orderTransaction;

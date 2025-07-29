@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.2]
+### Improvement
+- Improved the webhook to check paid state.
+
 ## [2.0.1]
 ### Fixed
 - Delete payment gateway and manage gateway ids.
