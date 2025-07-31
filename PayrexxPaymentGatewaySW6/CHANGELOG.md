@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.3]
+### Improvement
+- Fixed total amount for 0.1 difference.
+
 ## [2.0.2]
 ### Improvement
 - Improved the webhook to check paid state.
