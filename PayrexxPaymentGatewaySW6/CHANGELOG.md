@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.0]
+### Feature
+- Adds connect button flow
+
 ## [2.0.2]
 ### Improvement
 - Improved the webhook to check paid state.
