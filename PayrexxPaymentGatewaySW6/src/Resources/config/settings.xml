@@ -51,6 +51,9 @@
         </input-field>
         <component name="platform-connect-button">
             <name>platformConnectButton</name>
+            <label>Connect to Platform</label>
+            <label lang="de-DE">Mit Platform verbinden</label>
+            <helpText>Opens a new window to connect to your selected platform to import the credentials</helpText>
         </component>
         <input-field type="text">
             <name>instanceName</name>
