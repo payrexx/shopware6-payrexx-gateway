@@ -49,6 +49,9 @@
                 </option>
             </options>
         </input-field>
+        <component name="platform-connect-button">
+            <name>platformConnectButton</name>
+        </component>
         <input-field type="text">
             <name>instanceName</name>
             <label>Instance name</label>
@@ -68,7 +71,9 @@
             <label>Look &amp; Feel ID</label>
             <label lang="de-DE">Look &amp; Feel ID</label>
 
-            <helpText>A Look &amp; Feel ID from the settings of your Payrexx Merchant account. The standard is used if left empty</helpText>
+            <helpText>A Look &amp; Feel ID from the settings of your Payrexx Merchant account. The standard is used if
+                left empty
+            </helpText>
         </input-field>
     </card>
 </config>

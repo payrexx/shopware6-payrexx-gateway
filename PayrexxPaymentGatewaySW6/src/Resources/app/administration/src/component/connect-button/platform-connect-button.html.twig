@@ -1,0 +1,12 @@
+{% block platform_connect_button %}
+    <div class="sw-field my-custom-button-component">
+        <sw-button
+                variant="primary"
+                :disabled="isLoading || !isEnabled"
+                @click="onButtonClick">
+            {% block platform_connect_button_text %}
+                    Connect to {{ platform }}
+            {% endblock %}
+        </sw-button>
+    </div>
+{% endblock %}
