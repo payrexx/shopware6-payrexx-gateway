@@ -11,23 +11,34 @@ Component.register('platform-connect-button', {
         return {
             isLoading: false,
             isEnabled: false,
-            platform: 'payrexx.com.loc',
+            platform: '',
         }
     },
 
     created() {
-        const systemConfigApiService = Shopware.Service('systemConfigApiService');
-        systemConfigApiService.getValues('PayrexxPaymentGatewaySW6.settings').then(config => {
-            console.log(config);
-            if (config && config['PayrexxPaymentGatewaySW6.settings.platform']) {
-                this.platform = config['PayrexxPaymentGatewaySW6.settings.platform'];
-                this.isEnabled = true;
-            } else {
-                this.isEnabled = false;
-            }
-        });
+        try {
+            const systemConfigApiService = Shopware.Service('systemConfigApiService');
+            systemConfigApiService.getValues('PayrexxPaymentGatewaySW6.settings').then(config => {
+                if (config && config['PayrexxPaymentGatewaySW6.settings.platform']) {
+                    this.platform = config['PayrexxPaymentGatewaySW6.settings.platform'];
+                    this.isEnabled = true;
+                } else {
+                    this.isEnabled = false;
+                }
+            });
+        } catch (error) {
+            this.isEnabled = false;
+        }
 
         window.addEventListener('message', this.handleMessage);
+
+        // Listen for change of payrexx config (handle reactive changes)
+        this.$root.$on('payrexx-config-change', (event) => {
+            if (event['PayrexxPaymentGatewaySW6.settings.platform']) {
+                this.platform = event['PayrexxPaymentGatewaySW6.settings.platform'];
+                this.isEnabled = true;
+            }
+        })
     },
 
     beforeDestroy() {
@@ -48,21 +59,32 @@ Component.register('platform-connect-button', {
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
 
-            const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-            const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+            const width = window.innerWidth
+                ? window.innerWidth
+                : document.documentElement.clientWidth
+                    ? document.documentElement.clientWidth
+                    : screen.width;
+            const height = window.innerHeight
+                ? window.innerHeight
+                : document.documentElement.clientHeight
+                    ? document.documentElement.clientHeight
+                    : screen.height;
 
             const left = dualScreenLeft + (width - popupWidth) / 2;
             const top = dualScreenTop + (height - popupHeight) / 2;
 
             const params = `width=${popupWidth},height=${popupHeight},top=${top},left=${left},resizable=no,scrollbars=yes`
 
-            const systemConfigApiService = Shopware.Service('systemConfigApiService');
-            const systemConfig = await systemConfigApiService.getValues('PayrexxPaymentGatewaySW6.settings');
-            const platformName = systemConfig['PayrexxPaymentGatewaySW6.settings.platform'];
-            if (!platformName) {
+            if (!this.platform) {
+                const systemConfigApiService = Shopware.Service('systemConfigApiService');
+                const systemConfig = await systemConfigApiService.getValues('PayrexxPaymentGatewaySW6.settings');
+                this.platform = systemConfig['PayrexxPaymentGatewaySW6.settings.platform'];
+            }
+
+            if (!this.platform) {
                 this.createNotificationError({
-                    title: 'No Platform Selected',
-                    message: 'Please select a platform before selecting this value if you have selected',
+                    title: this.$tc('payrexx-payment.settingsForm.connectButton.messages.noPlatform.title'),
+                    message: this.$tc('payrexx-payment.settingsForm.connectButton.messages.noPlatform.message'),
                 })
                 return;
             }
@@ -76,8 +98,8 @@ Component.register('platform-connect-button', {
                     popupWindow = null;
                     if (this.isLoading) {
                         this.createNotificationWarning({
-                            title: 'Cancelled',
-                            message: 'Connect attempt cancelled.',
+                            title: this.$tc('payrexx-payment.settingsForm.connectButton.messages.cancelled.title'),
+                            message: this.$tc('payrexx-payment.settingsForm.connectButton.messages.cancelled.message'),
                         });
                     }
                     this.isLoading = false;
@@ -93,26 +115,28 @@ Component.register('platform-connect-button', {
                 return;
             }
             const data = event.data;
-            console.log(data);
 
             try {
                 this.storePayload(data.instance);
                 this.setFieldValues(data.instance);
                 this.createNotificationSuccess({
-                    title: 'Success',
-                    message: 'API Key and Instance have been updated successfully.',
+                    title: this.$tc('payrexx-payment.settingsForm.connectButton.messages.success.title'),
+                    message: this.$tc('payrexx-payment.settingsForm.connectButton.messages.success.message'),
                 });
             } catch (error) {
                 this.createNotificationError({
-                    title: 'Error Saving',
-                    message: `Failed to save configuration: ${error.message}`,
+                    title: this.$tc('payrexx-payment.settingsForm.connectButton.messages.error.title'),
+                    message: this.$tc('payrexx-payment.settingsForm.connectButton.messages.error.message', {message: error.message}),
                 });
             }
-        }, async storePayload(instance) {
+        },
+
+        storePayload(instance) {
             const systemConfigApiService = Shopware.Service('systemConfigApiService');
-            await systemConfigApiService.saveValues({
+            systemConfigApiService.saveValues({
                 'PayrexxPaymentGatewaySW6.settings.apiKey': instance.apikey,
                 'PayrexxPaymentGatewaySW6.settings.instanceName': instance.name,
+                'PayrexxPaymentGatewaySW6.settings.platform': this.platform,
             });
         },
 
