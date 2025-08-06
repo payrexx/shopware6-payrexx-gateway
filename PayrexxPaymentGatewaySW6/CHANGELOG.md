@@ -2,7 +2,11 @@
 
 ## [2.1.0]
 ### Feature
-- Adds connect button flow
+- Adds connect button flow.
+
+## [2.0.3]
+### Improvement
+- Fixed total amount for 0.1 difference.
 
 ## [2.0.2]
 ### Improvement
