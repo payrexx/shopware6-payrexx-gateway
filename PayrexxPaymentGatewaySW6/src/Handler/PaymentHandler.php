@@ -80,9 +80,6 @@ class PaymentHandler extends AbstractPaymentHandler
         [$orderTransaction, $order] = $this->fetchOrderTransaction($transaction->getOrderTransactionId(), $context);
         $totalAmount = $orderTransaction->getAmount()->getTotalPrice();
 
-        // Convert to cents and round for further usage
-        $totalAmount = intval($totalAmount * 100);
-
         // Workaround if amount is 0
         if ($totalAmount <= 0) {
             $redirectUrl = $transaction->getReturnUrl();
@@ -112,7 +109,7 @@ class PaymentHandler extends AbstractPaymentHandler
         $basketAmount = $this->getBasketAmount($basket);
 
         // Compare with rounded totals to check if basket is correct
-        if ($totalAmount !== $basketAmount) {
+        if ($totalAmount !== ($basketAmount / 100)) {
             $basket = [];
         }
 
