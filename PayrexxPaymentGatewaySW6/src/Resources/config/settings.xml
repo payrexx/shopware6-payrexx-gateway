@@ -49,6 +49,13 @@
                 </option>
             </options>
         </input-field>
+        <component name="platform-connect-button">
+            <name>platformConnectButton</name>
+            <label>Connect to Platform</label>
+            <label lang="de-DE">Mit Platform verbinden</label>
+            <helpText>Opens a new window to connect to your selected platform to import the credentials</helpText>
+            <helpText lang="de-DE">Öffnet ein neues Fenster, um eine Verbindung zu Ihrer ausgewählten Plattform herzustellen und die Anmeldedaten zu importieren.</helpText>
+        </component>
         <input-field type="text">
             <name>instanceName</name>
             <label>Instance name</label>
@@ -68,7 +75,9 @@
             <label>Look &amp; Feel ID</label>
             <label lang="de-DE">Look &amp; Feel ID</label>
 
-            <helpText>A Look &amp; Feel ID from the settings of your Payrexx Merchant account. The standard is used if left empty</helpText>
+            <helpText>A Look &amp; Feel ID from the settings of your Payrexx Merchant account. The standard is used if
+                left empty
+            </helpText>
         </input-field>
     </card>
 </config>

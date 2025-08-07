@@ -63,7 +63,6 @@ Component.register('payrexx-settings', {
                 platform: this.getConfigValue('platform'),
             };
 
-
             this.PayrexxPaymentSettingsService.validateApiCredentials(credentials).then((response) => {
                 const credentialsValid = response.credentialsValid;
                 const error = response.error;
@@ -96,6 +95,8 @@ Component.register('payrexx-settings', {
             this.checkCredentialsFilled();
 
             this.showValidationErrors = false;
+
+            this.$root.$emit('payrexx-config-change', config);
         },
 
         getBind(element, config) {
