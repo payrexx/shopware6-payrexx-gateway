@@ -17,6 +17,7 @@
             <argument type="service" id="monolog.logger"/>
             <argument type="service" id="router" />
             <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack" />
+            <argument type="service" id="Shopware\Core\Framework\Plugin\PluginService" />
             <tag name="shopware.payment.method" />
         </service>
 

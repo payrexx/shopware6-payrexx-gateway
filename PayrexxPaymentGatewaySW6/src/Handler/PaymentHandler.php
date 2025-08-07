@@ -31,6 +31,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\PaymentHandlerType;
 use Shopware\Core\Framework\Struct\Struct;
 use Shopware\Core\Checkout\Payment\Cart\PaymentTransactionStruct;
+use Shopware\Core\Framework\Plugin\PluginService;
 
 class PaymentHandler extends AbstractPaymentHandler
 {
@@ -47,6 +48,7 @@ class PaymentHandler extends AbstractPaymentHandler
     protected LoggerInterface $logger;
     protected RouterInterface $router;
     protected RequestStack $requestStack;
+    protected PluginService $pluginService;
 
     public function __construct(
         OrderTransactionStateHandler $transactionStateHandler,
@@ -57,7 +59,8 @@ class PaymentHandler extends AbstractPaymentHandler
         ConfigService $configService,
         LoggerInterface $logger,
         RouterInterface $router,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        PluginService $pluginService,
     ) {
         $this->transactionStateHandler = $transactionStateHandler;
         $this->container = $container;
@@ -68,6 +71,7 @@ class PaymentHandler extends AbstractPaymentHandler
         $this->logger = $logger;
         $this->router = $router;
         $this->requestStack = $requestStack;
+        $this->pluginService = $pluginService;
     }
 
     public function pay(
@@ -157,6 +161,21 @@ class PaymentHandler extends AbstractPaymentHandler
             $order->getOrderNumber(),
             $transactionId
         );
+
+        $metaData = [];
+        try {
+            $metaData['X-Shop-Version'] = (string) $this->container->getParameter(
+                'kernel.shopware_version'
+            );
+            $plugin = $this->pluginService->getPluginByName(
+                'PayrexxPaymentGatewaySW6',
+                Context::createDefaultContext()
+            );
+            if ($plugin) {
+                $metaData['X-Plugin-Version'] = (string) $plugin->getVersion();
+            }
+        } catch (Exception $e) {}
+
         // Create Payrexx Gateway link for checkout and redirect user
         try {
             $payrexxGateway = $this->payrexxApiService->createPayrexxGateway(
@@ -169,7 +188,8 @@ class PaymentHandler extends AbstractPaymentHandler
                 $returnUrl,
                 $basket,
                 $salesChannelId,
-                $purpose
+                $purpose,
+                $metaData
             );
 
             if (!$payrexxGateway) {

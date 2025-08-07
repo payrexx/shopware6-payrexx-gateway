@@ -41,7 +41,8 @@ class PayrexxApiService
         array $redirectUrl,
         array $basket,
         string $salesChannelId,
-        string $purpose
+        string $purpose,
+        array $metaData
     ): ?Gateway  {
         $config = $this->configService->getPluginConfiguration($salesChannelId);
         $lookAndFeelId = !empty($config['lookFeelID']) ? $config['lookFeelID'] : null;
@@ -72,6 +73,9 @@ class PayrexxApiService
             $gateway->setPurpose($purpose);
         }
 
+        if (!empty($metaData)) {
+            $payrexx->setHttpHeaders($metaData);
+        }
         try {
             return $payrexx->create($gateway);
         } catch (\Payrexx\PayrexxException $e) {
