@@ -49,7 +49,7 @@ class PayrexxApiService
 
         $payrexx = $this->getInterface($salesChannelId);
         $gateway = new \Payrexx\Models\Request\Gateway();
-        $gateway->setAmount($amount * 100);
+        $gateway->setAmount((int) ($amount * 100));
         $gateway->setVatRate($averageVatRate);
         $gateway->setCurrency($currency);
         $gateway->setSuccessRedirectUrl($redirectUrl['success']);
