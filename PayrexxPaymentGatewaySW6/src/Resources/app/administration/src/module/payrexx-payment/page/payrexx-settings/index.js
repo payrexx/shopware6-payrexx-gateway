@@ -96,7 +96,7 @@ Component.register('payrexx-settings', {
 
             this.showValidationErrors = false;
 
-            this.$root.$emit('payrexx-config-change', config);
+            dispatchEvent(new CustomEvent('payrexx-config-change', { detail: config }));
         },
 
         getBind(element, config) {

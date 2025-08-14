@@ -7,5 +7,5 @@
     <services>
         <service id="PayrexxPaymentGateway\Administration\PayrexxPaymentMethodController">
         </service>
-    <services>
+    </services>
 </container>
