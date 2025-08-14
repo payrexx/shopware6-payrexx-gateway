@@ -7,6 +7,8 @@ use PayrexxPaymentGateway\Installer\InstallerInterface;
 use Shopware\Core\Framework\Context;
 use PayrexxPaymentGateway\Handler\PaymentHandler;
 use PayrexxPaymentGateway\PayrexxPaymentGatewaySW6;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\AndFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\OrFilter;
 use Shopware\Core\Framework\Plugin\Context\ActivateContext;
 use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
@@ -576,9 +578,17 @@ class PaymentMethodInstaller implements InstallerInterface
     {
         $pluginId = $this->pluginIdProvider->getPluginIdByBaseClass(PayrexxPaymentGatewaySW6::class, $context);
 
+        $technicalName = PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier;
         $criteria = (new Criteria())
-            ->addFilter(new EqualsFilter('handlerIdentifier', PaymentHandler::class))
-            ->addFilter(new EqualsFilter('customFields.payrexx_payment_method_name', PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier))
+            ->addFilter(
+                new OrFilter([
+                    new EqualsFilter('technicalName', $technicalName),
+                    new AndFilter([
+                        new EqualsFilter('handlerIdentifier', PaymentHandler::class),
+                        new EqualsFilter('customFields.payrexx_payment_method_name', $technicalName)
+                    ])
+                ])
+            )
             ->setLimit(1);
         $paymentMethods = $this->paymentMethodRepository->search($criteria, Context::createDefaultContext());
 
@@ -596,9 +606,9 @@ class PaymentMethodInstaller implements InstallerInterface
             'handlerIdentifier' => PaymentHandler::class,
             'active' => $paymentMethodActive,
             'pluginId' => $pluginId,
-            'technicalName' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
+            'technicalName' => $technicalName,
             'customFields' => [
-                'payrexx_payment_method_name' => PaymentHandler::PAYMENT_METHOD_PREFIX . $payrexxPaymentMethodIdentifier,
+                'payrexx_payment_method_name' => $technicalName,
             ]
         ];
 
