@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.1]
+### Fixed
+- Payrexx Settings on Administration.
+- Improved total amount conversion.
+- Improved the connect button.
+
 ## [2.1.0]
 ### Feature
 - Adds connect button flow.
