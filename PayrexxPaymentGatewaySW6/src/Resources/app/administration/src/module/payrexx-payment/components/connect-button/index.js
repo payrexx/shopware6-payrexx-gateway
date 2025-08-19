@@ -33,9 +33,9 @@ Component.register('platform-connect-button', {
         window.addEventListener('message', this.handleMessage);
 
         // Listen for change of payrexx config (handle reactive changes)
-        this.$root.$on('payrexx-config-change', (event) => {
-            if (event['PayrexxPaymentGatewaySW6.settings.platform']) {
-                this.platform = event['PayrexxPaymentGatewaySW6.settings.platform'];
+        window.addEventListener('payrexx-config-change', (event) => {
+            if (event.detail['PayrexxPaymentGatewaySW6.settings.platform']) {
+                this.platform = event.detail['PayrexxPaymentGatewaySW6.settings.platform'];
                 this.isEnabled = true;
             }
         })
