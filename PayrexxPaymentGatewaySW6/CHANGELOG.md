@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.2.0]
+### Feature
+- Added a new payment method for Crypto.
+
 ## [2.1.1]
 ### Fixed
 - Payrexx Settings on Administration.
