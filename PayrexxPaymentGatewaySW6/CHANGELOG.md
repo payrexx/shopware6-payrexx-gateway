@@ -1,7 +1,7 @@
 # Changelog
 
-## [2.2.0]
-### Feature
+## [2.1.2]
+### Info
 - Added a new payment method for Crypto.
 
 ## [2.1.1]
