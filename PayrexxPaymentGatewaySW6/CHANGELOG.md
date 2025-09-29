@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.3]
+### Info
+- Added a new payment method for VERD.cash.
+
 ## [2.1.2]
 ### Info
 - Added a new payment method for Crypto.

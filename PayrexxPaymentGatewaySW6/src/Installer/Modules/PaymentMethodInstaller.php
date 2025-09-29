@@ -68,6 +68,7 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_POWERPAY           = 'powerpay';
     public const PAYREXX_CEMBRAPAY          = 'cembrapay';
     public const PAYREXX_CRYPTO             = 'crypto';
+    public const PAYREXX_VERD_CASH          = 'verd-cash';
     public const PAYREXX_NO_PM              = '';
 
     const PAYMENT_METHODS = [
@@ -518,6 +519,16 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'Crypto',
+                ],
+            ],
+        ],
+        self::PAYREXX_VERD_CASH => [
+            'translations' => [
+                'de-DE' => [
+                    'name' => 'VERD.Cash',
+                ],
+                'en-GB' => [
+                    'name' => 'VERD.Cash',
                 ],
             ],
         ],
