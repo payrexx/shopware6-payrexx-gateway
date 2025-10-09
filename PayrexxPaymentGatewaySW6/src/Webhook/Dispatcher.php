@@ -113,7 +113,9 @@ class Dispatcher
                 $state = $orderTransaction->getStateMachineState();
 
                 if ($state && $state->getTechnicalName() === OrderTransactionStates::STATE_PAID) {
-                    return new Response('Already Paid State', Response::HTTP_OK);
+                    if (!in_array($requestTransaction->status, ['refunded', 'partially-refunded'])) {
+                        return new Response('Already Paid State', Response::HTTP_OK);
+                    }
                 }
                 $savedGatewayIds = explode(',', (string) $orderTransaction->getCustomFields()['gateway_id']);
                 if (in_array($requestGatewayId, $savedGatewayIds)) {

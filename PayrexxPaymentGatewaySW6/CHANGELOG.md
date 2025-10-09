@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.4]
+### Info
+- Fixed refund webhook status.
+
 ## [2.1.3]
 ### Info
 - Added a new payment method for VERD.cash.
