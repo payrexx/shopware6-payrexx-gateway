@@ -505,10 +505,10 @@ class PaymentMethodInstaller implements InstallerInterface
         self::PAYREXX_CEMBRAPAY => [
             'translations' => [
                 'de-DE' => [
-                    'name' => 'Kauf auf Rechnung',
+                    'name' => 'Kauf auf Rechnung (Cembra Pay)',
                 ],
                 'en-GB' => [
-                    'name' => 'Purchase on Account',
+                    'name' => 'Purchase on Account (Cembra Pay)',
                 ],
             ],
         ],
