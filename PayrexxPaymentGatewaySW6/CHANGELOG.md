@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.5]
+### Info
+- CembraPay changed into Purchase on Account.
+
 ## [2.1.4]
 ### Info
 - Fixed refund webhook status.
