@@ -43,10 +43,19 @@ class CustomerService
             $shippingAddress = $delivery->getShippingOrderAddress();
         }
 
+        $company = $address->getCompany();
+        $department = $address->getDepartment();
+        if (!empty($department)) {
+            if (!empty($company)) {
+                $company .= '/' . $department;
+            } else {
+                $company = $department;
+            }
+        }
         $billingDetails = [
             'forename' => $address->getFirstName(),
             'surname' => $address->getLastName(),
-            'company' => $address->getCompany(),
+            'company' => $company,
             'street' => $address->getStreet(),
             'postcode' => $address->getZipCode(),
             'place' => $address->getCity(),
@@ -56,10 +65,19 @@ class CustomerService
 
         $shippingDetails = [];
         if ($shippingAddress) {
+            $shippingCompany = $shippingAddress->getCompany() ?? $address->getCompany();
+            $shippingDepartment = $shippingAddress->getDepartment() ?? $address->getDepartment();
+            if (!empty($shippingDepartment)) {
+                if (!empty($shippingCompany)) {
+                    $shippingCompany .= '/' . $shippingDepartment;
+                } else {
+                    $shippingCompany = $shippingDepartment;
+                }
+            }
             $shippingDetails = [
                 'delivery_forename' => $shippingAddress->getFirstName() ?? $address->getFirstName(),
                 'delivery_surname' => $shippingAddress->getLastName() ?? $address->getLastName(),
-                'delivery_company' => $shippingAddress->getCompany() ?? $address->getCompany(),
+                'delivery_company' => $shippingCompany,
                 'delivery_street' => $shippingAddress->getStreet() ?? $address->getStreet(),
                 'delivery_postcode' => $shippingAddress->getZipCode() ?? $address->getZipCode(),
                 'delivery_place' => $shippingAddress->getCity() ?? $address->getCity(),
