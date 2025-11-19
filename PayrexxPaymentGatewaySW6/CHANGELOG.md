@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.6]
+### Feature
+- Added **department** field to **company** in API requests.
+
 ## [2.1.5]
 ### Info
 - CembraPay changed into Purchase on Account.
