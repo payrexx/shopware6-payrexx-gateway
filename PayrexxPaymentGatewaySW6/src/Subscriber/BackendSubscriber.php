@@ -38,6 +38,10 @@ class BackendSubscriber implements EventSubscriberInterface
 
             $payload = $writeResult->getPayload();
 
+            if (!isset($payload['id'])) {
+                continue;
+            }
+
             /** @var EntityRepositoryInterface $stateRepository */
             $deliveryRepository = $this->container->get('order_delivery.repository');
             try {
