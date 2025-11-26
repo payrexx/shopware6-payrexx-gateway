@@ -402,11 +402,15 @@ class PaymentHandler extends AbstractPaymentHandler
 
         // Check if the request comes from Store API (headless frontend)
         $isStoreApiRequest = (strpos($urlPath, '/store-api') === 0);
+        $errorUrl = null;
+        if ($isStoreApiRequest) {
+            $errorUrl = $request->getPayload()->get('errorUrl');
+        }
 
         return [
             'success' => $returnUrl,
             'cancel' => $isStoreApiRequest
-                ? $returnUrl
+                ? ($errorUrl ?: $returnUrl)
                 : $this->router->generate(
                     'frontend.payrexx-payment.cancel',
                     [
