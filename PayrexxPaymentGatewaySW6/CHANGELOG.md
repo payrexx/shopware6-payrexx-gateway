@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.7]
+### Info
+- Improved code to set cancelUrl in the Store API.
+
 ## [2.1.6]
 ### Feature
 - Added **department** field to **company** in API requests.
