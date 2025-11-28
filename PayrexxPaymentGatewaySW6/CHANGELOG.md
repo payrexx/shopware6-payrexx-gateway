@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.8]
+### Improvement
+- Improved webhook response.
+
 ## [2.1.7]
 ### Info
 - Improved code to set cancelUrl in the Store API.
