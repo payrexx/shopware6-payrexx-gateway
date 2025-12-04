@@ -107,6 +107,9 @@ class Dispatcher
                 $order = $orderDetails->first();
             }
 
+            if (!$order) {
+                return new Response('Order does not exists.', Response::HTTP_OK);
+            }
             $transaction = false;
             foreach($order->getTransactions() as $orderTransaction) {
                 // Check all transaction if has already paid
