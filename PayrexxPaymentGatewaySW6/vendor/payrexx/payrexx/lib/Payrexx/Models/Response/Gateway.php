@@ -17,9 +17,9 @@ namespace Payrexx\Models\Response;
  */
 class Gateway extends \Payrexx\Models\Request\Gateway
 {
-    protected string $hash;
+    protected string $hash = '';
 
-    protected string $link;
+    protected string $link = '';
 
     protected string $status;
 
@@ -52,6 +52,10 @@ class Gateway extends \Payrexx\Models\Request\Gateway
 
     public function setLink(string $link): void
     {
+        $language = $this->getLanguage();
+        if (!empty($language) && strpos($link, "/{$language}/") === false) {
+            $link = str_replace('/?', "/{$language}/?", $link);
+        }
         $this->link = $link;
     }
 
