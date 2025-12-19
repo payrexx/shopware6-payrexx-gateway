@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.10]
+### Improvement
+- Upgraded the Payrexx SDK.
+
 ## [2.1.9]
 ### Improvement
 - Improved the code.
