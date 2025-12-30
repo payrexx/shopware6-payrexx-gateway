@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.11]
+### Improvement
+- Upgraded the Payrexx SDK to support Exclusive VAT handling.
+
 ## [2.1.10]
 ### Improvement
 - Upgraded the Payrexx SDK.
