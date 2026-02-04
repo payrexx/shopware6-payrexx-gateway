@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc15ddb109464940e58dea669587e0288
+class ComposerStaticInit35cbc866de82769144c2a03a4bf30ea2
 {
     public static $prefixLengthsPsr4 = array (
         'P' => 
@@ -32,15 +32,62 @@ class ComposerStaticInitc15ddb109464940e58dea669587e0288
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'PayrexxPaymentGateway\\Administration\\PayrexxPaymentMethodController' => __DIR__ . '/../..' . '/src/Administration/PayrexxPaymentMethodController.php',
+        'PayrexxPaymentGateway\\CookieProvider\\CookieProvider' => __DIR__ . '/../..' . '/src/CookieProvider/CookieProvider.php',
+        'PayrexxPaymentGateway\\Handler\\PaymentHandler' => __DIR__ . '/../..' . '/src/Handler/PaymentHandler.php',
+        'PayrexxPaymentGateway\\Handler\\TransactionHandler' => __DIR__ . '/../..' . '/src/Handler/TransactionHandler.php',
+        'PayrexxPaymentGateway\\Installer\\InstallerInterface' => __DIR__ . '/../..' . '/src/Installer/InstallerInterface.php',
+        'PayrexxPaymentGateway\\Installer\\Modules\\PaymentMethodInstaller' => __DIR__ . '/../..' . '/src/Installer/Modules/PaymentMethodInstaller.php',
+        'PayrexxPaymentGateway\\Installer\\PayrexxPaymentInstaller' => __DIR__ . '/../..' . '/src/Installer/PayrexxPaymentInstaller.php',
+        'PayrexxPaymentGateway\\PayrexxPaymentGatewaySW6' => __DIR__ . '/../..' . '/src/PayrexxPaymentGatewaySW6.php',
+        'PayrexxPaymentGateway\\Service\\ConfigService' => __DIR__ . '/../..' . '/src/Service/ConfigService.php',
+        'PayrexxPaymentGateway\\Service\\CustomerService' => __DIR__ . '/../..' . '/src/Service/CustomerService.php',
+        'PayrexxPaymentGateway\\Service\\PayrexxApiService' => __DIR__ . '/../..' . '/src/Service/PayrexxApiService.php',
+        'PayrexxPaymentGateway\\Subscriber\\BackendSubscriber' => __DIR__ . '/../..' . '/src/Subscriber/BackendSubscriber.php',
+        'PayrexxPaymentGateway\\Util\\Compatibility\\EntityRepositoryDecorator' => __DIR__ . '/../..' . '/src/Util/Compatibility/EntityRepositoryDecorator.php',
+        'PayrexxPaymentGateway\\Webhook\\Cancel' => __DIR__ . '/../..' . '/src/Webhook/Cancel.php',
+        'PayrexxPaymentGateway\\Webhook\\Dispatcher' => __DIR__ . '/../..' . '/src/Webhook/Dispatcher.php',
+        'Payrexx\\CommunicationAdapter\\AbstractCommunication' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/CommunicationAdapter/AbstractCommunication.php',
+        'Payrexx\\CommunicationAdapter\\CurlCommunication' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/CommunicationAdapter/CurlCommunication.php',
+        'Payrexx\\Communicator' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Communicator.php',
+        'Payrexx\\Models\\Base' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Base.php',
+        'Payrexx\\Models\\Request\\AuthToken' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/AuthToken.php',
+        'Payrexx\\Models\\Request\\Design' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Design.php',
+        'Payrexx\\Models\\Request\\Gateway' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Gateway.php',
+        'Payrexx\\Models\\Request\\Invoice' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Invoice.php',
+        'Payrexx\\Models\\Request\\Page' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Page.php',
+        'Payrexx\\Models\\Request\\PaymentMethod' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/PaymentMethod.php',
+        'Payrexx\\Models\\Request\\PaymentProvider' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/PaymentProvider.php',
+        'Payrexx\\Models\\Request\\Payout' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Payout.php',
+        'Payrexx\\Models\\Request\\QrCode' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/QrCode.php',
+        'Payrexx\\Models\\Request\\QrCodeScan' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/QrCodeScan.php',
+        'Payrexx\\Models\\Request\\SignatureCheck' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/SignatureCheck.php',
+        'Payrexx\\Models\\Request\\Subscription' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Subscription.php',
+        'Payrexx\\Models\\Request\\Transaction' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Request/Transaction.php',
+        'Payrexx\\Models\\Response\\AuthToken' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/AuthToken.php',
+        'Payrexx\\Models\\Response\\Design' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Design.php',
+        'Payrexx\\Models\\Response\\Gateway' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Gateway.php',
+        'Payrexx\\Models\\Response\\Invoice' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Invoice.php',
+        'Payrexx\\Models\\Response\\Page' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Page.php',
+        'Payrexx\\Models\\Response\\PaymentMethod' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/PaymentMethod.php',
+        'Payrexx\\Models\\Response\\PaymentProvider' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/PaymentProvider.php',
+        'Payrexx\\Models\\Response\\Payout' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Payout.php',
+        'Payrexx\\Models\\Response\\QrCode' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/QrCode.php',
+        'Payrexx\\Models\\Response\\QrCodeScan' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/QrCodeScan.php',
+        'Payrexx\\Models\\Response\\SignatureCheck' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/SignatureCheck.php',
+        'Payrexx\\Models\\Response\\Subscription' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Subscription.php',
+        'Payrexx\\Models\\Response\\Transaction' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Models/Response/Transaction.php',
+        'Payrexx\\Payrexx' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/Payrexx.php',
+        'Payrexx\\PayrexxException' => __DIR__ . '/..' . '/payrexx/payrexx/lib/Payrexx/PayrexxException.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc15ddb109464940e58dea669587e0288::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc15ddb109464940e58dea669587e0288::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc15ddb109464940e58dea669587e0288::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitc15ddb109464940e58dea669587e0288::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit35cbc866de82769144c2a03a4bf30ea2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit35cbc866de82769144c2a03a4bf30ea2::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit35cbc866de82769144c2a03a4bf30ea2::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit35cbc866de82769144c2a03a4bf30ea2::$classMap;
 
         }, null, ClassLoader::class);
     }
