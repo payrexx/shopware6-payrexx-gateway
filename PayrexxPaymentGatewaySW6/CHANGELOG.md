@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.11]
+### Improvement
+- Downgraded the Payrexx SDK to resolve server issues on Webhook.
+
 ## [2.1.10]
 ### Improvement
 - Upgraded the Payrexx SDK.
