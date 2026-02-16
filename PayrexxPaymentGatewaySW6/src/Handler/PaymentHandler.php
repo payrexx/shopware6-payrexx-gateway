@@ -113,7 +113,7 @@ class PaymentHandler extends AbstractPaymentHandler
         $basketAmount = $this->getBasketAmount($basket);
 
         // Compare with rounded totals to check if basket is correct
-        if ($totalAmount !== ($basketAmount / 100)) {
+        if ((float) $totalAmount !== (float) ($basketAmount / 100)) {
             $basket = [];
         }
 

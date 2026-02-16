@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.12]
+### Improvement
+- Improve basket total amount comparison.
+
 ## [2.1.11]
 ### Improvement
 - Downgraded the Payrexx SDK to resolve server issues on Webhook.
