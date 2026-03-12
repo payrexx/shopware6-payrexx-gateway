@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.13]
+### Improvement
+- Upgraded the Payrexx SDK.
+
 ## [2.1.12]
 ### Improvement
 - Improve basket total amount comparison.

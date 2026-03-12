@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'payrexx/payment',
-        'pretty_version' => '2.1.10',
-        'version' => '2.1.10.0',
+        'pretty_version' => '2.1.12',
+        'version' => '2.1.12.0',
         'reference' => null,
         'type' => 'shopware-platform-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -11,8 +11,8 @@
     ),
     'versions' => array(
         'payrexx/payment' => array(
-            'pretty_version' => '2.1.10',
-            'version' => '2.1.10.0',
+            'pretty_version' => '2.1.12',
+            'version' => '2.1.12.0',
             'reference' => null,
             'type' => 'shopware-platform-plugin',
             'install_path' => __DIR__ . '/../../',
@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'payrexx/payrexx' => array(
-            'pretty_version' => 'v1.8.11',
-            'version' => '1.8.11.0',
-            'reference' => '30bd92fa3d56586a06705477fafdba7b7bf3a0bd',
+            'pretty_version' => 'v2.0.12',
+            'version' => '2.0.12.0',
+            'reference' => '3c65ea106c2b2ca444fd3c823fbc78be7cfeb75a',
             'type' => 'library',
             'install_path' => __DIR__ . '/../payrexx/payrexx',
             'aliases' => array(),
