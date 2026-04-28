@@ -77,6 +77,9 @@ class Dispatcher
         $swOrderNumber = $requestTransaction->referenceId;
         $requestGatewayId = $requestTransaction->invoice->paymentRequestId;
 
+        $this->logger->info('Payrexx Webhook: Process Started', [
+            'swOrderNumber' => $requestTransaction->referenceId
+        ]);
         // check required data
         if (!$swOrderNumber || !$requestTransaction->status || !$requestTransaction->id) {
             return new Response('Data incomplete', Response::HTTP_BAD_REQUEST);
@@ -107,10 +110,17 @@ class Dispatcher
                 $order = $orderDetails->first();
             }
 
+            $this->logger->info('Payrexx Webhook: order search completed', [
+                'order' => $order->getId(),
+                'swOrderNumber' => $requestTransaction->referenceId
+            ]);
             if (!$order) {
                 return new Response('Order does not exists.', Response::HTTP_OK);
             }
             $transaction = false;
+            $this->logger->info('Payrexx Webhook: order transactions: Before', [
+                'swOrderNumber' => $requestTransaction->referenceId
+            ]);
             foreach($order->getTransactions() as $orderTransaction) {
                 // Check all transaction if has already paid
                 $state = $orderTransaction->getStateMachineState();
@@ -126,7 +136,9 @@ class Dispatcher
                     break;
                 }
             }
-
+            $this->logger->info('Payrexx Webhook: order transactions: after', [
+                'swOrderNumber' => $requestTransaction->referenceId
+            ]);
         } catch (\Payrexx\PayrexxException $e) {
             return new Response('Data incorrect', Response::HTTP_BAD_REQUEST);
         }
@@ -139,14 +151,29 @@ class Dispatcher
             );
         }
 
+        $this->logger->info('Payrexx Webhook: getPayrexxTransaction:before', [
+            'swOrderNumber' => $requestTransaction->referenceId,
+            'payrexxTransId' => $requestTransaction->id
+        ]);
         // Validate request by status
         $payrexxTransaction = $this->payrexxApiService->getPayrexxTransaction($requestTransaction->id, $order->getSalesChannelId());
+        $this->logger->info('Payrexx Webhook: getPayrexxTransaction:after', [
+            'swOrderNumber' => $requestTransaction->referenceId,
+            'payrexxTransId' => $requestTransaction->id
+        ]);
         if ($payrexxTransaction->getStatus() !== $requestTransaction->status) {
             return new Response('Validation: Status Mismatch', Response::HTTP_BAD_REQUEST);
         }
 
+        $this->logger->info('Payrexx Webhook: handleTransactionStatus:before', [
+            'swOrderNumber' => $requestTransaction->referenceId,
+        ]);
         $this->transactionHandler->handleTransactionStatus($transaction, $requestTransaction->status, $context);
 
+        $this->logger->info('Payrexx Webhook: handleTransactionStatus:after', [
+            'swOrderNumber' => $requestTransaction->referenceId,
+            'status' => 'final status'
+        ]);
         return new Response('', Response::HTTP_OK);
     }
 }
