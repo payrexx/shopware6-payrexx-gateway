@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.14]
+### Improvement
+- Improved the code to handle one-cent differences during amount comparison.
+
 ## [2.1.13]
 ### Improvement
 - Upgraded the Payrexx SDK.
