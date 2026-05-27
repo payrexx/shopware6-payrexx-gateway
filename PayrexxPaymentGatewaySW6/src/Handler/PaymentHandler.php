@@ -341,7 +341,7 @@ class PaymentHandler extends AbstractPaymentHandler
             $amount = $product['amount'];
             $basketAmount += $product['quantity'] * $amount;
         }
-        return intval($basketAmount);
+        return intval((string) $basketAmount);
     }
 
     /**
