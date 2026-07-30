@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.15]
+### Fixed
+- Load the bundled Payrexx SDK only when it is not already provided by the shop, preventing duplicate class definitions on Composer installations.
+
 ## [2.1.14]
 ### Improvement
 - Improved the code to handle one-cent differences during amount comparison.

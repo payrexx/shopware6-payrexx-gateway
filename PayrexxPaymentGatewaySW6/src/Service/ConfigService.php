@@ -2,6 +2,7 @@
 
 namespace PayrexxPaymentGateway\Service;
 
+use Payrexx\Payrexx;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -23,7 +24,9 @@ class ConfigService
 
     public function getPluginConfiguration(string $requestSalesChannelId): array
     {
-        require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';
+        if (!class_exists(Payrexx::class)) {
+            require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+        }
 
         $config = [];
         $salesChannelConfig = [];
