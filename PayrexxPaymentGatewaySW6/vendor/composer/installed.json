@@ -2,28 +2,29 @@
     "packages": [
         {
             "name": "payrexx/payrexx",
-            "version": "v2.0.12",
-            "version_normalized": "2.0.12.0",
+            "version": "v2.0.15",
+            "version_normalized": "2.0.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/payrexx/payrexx-php.git",
-                "reference": "6d249753a2b0aaf4b82ea73614c1ad0498d216be"
+                "reference": "33c898223c7dc87d623c43b741d708bd23d87b6e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/6d249753a2b0aaf4b82ea73614c1ad0498d216be",
-                "reference": "6d249753a2b0aaf4b82ea73614c1ad0498d216be",
+                "url": "https://api.github.com/repos/payrexx/payrexx-php/zipball/33c898223c7dc87d623c43b741d708bd23d87b6e",
+                "reference": "33c898223c7dc87d623c43b741d708bd23d87b6e",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.0"
+                "php": "^8.0",
+                "ext-curl": "*"
             },
             "require-dev": {
                 "guzzlehttp/guzzle": "^7.0",
                 "pestphp/pest": "^3.8",
                 "phpstan/phpstan": "^2.1"
             },
-            "time": "2026-03-12T10:14:17+00:00",
+            "time": "2026-08-03T08:04:45+00:00",
             "type": "library",
             "installation-source": "source",
             "autoload": {
