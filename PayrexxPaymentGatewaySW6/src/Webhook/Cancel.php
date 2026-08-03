@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace PayrexxPaymentGateway\Webhook;
 
+use Payrexx\Payrexx;
 use PayrexxPaymentGateway\Handler\TransactionHandler;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionStates;
 use Shopware\Core\Framework\Context;
@@ -89,8 +90,8 @@ class Cancel
             return new Response('Transaction not found.', Response::HTTP_NOT_FOUND);
         }
 
-        if (!class_exists(\Payrexx\Models\Response\Transaction::class)) {
-            require_once dirname(dirname(__DIR__)). '/vendor/autoload.php';
+        if (!class_exists(Payrexx::class)) {
+            require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
         }
         
         $this->transactionHandler->handleTransactionStatus(
