@@ -47,6 +47,10 @@
                     <id>paydirect.ch</id>
                     <name>Paydirect</name>
                 </option>
+                <option>
+                    <id>pay.electronicpartner.ch</id>
+                    <name>Electronic Partner</name>
+                </option>
             </options>
         </input-field>
         <component name="platform-connect-button">
