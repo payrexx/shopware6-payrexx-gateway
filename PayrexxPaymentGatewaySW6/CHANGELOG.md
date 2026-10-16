@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.16]
+### Improvement
+- Added the Electronic Partner platform (pay.electronicpartner.ch) to the platform selection.
+
 ## [2.1.15]
 ### Fixed
 - Load the bundled Payrexx SDK only when it is not already provided by the shop, preventing duplicate class definitions on Composer installations.
