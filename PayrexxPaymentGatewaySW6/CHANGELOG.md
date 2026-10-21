@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.17]
+### Fixed
+- Round basket item, shipping and tax amounts to whole cents, preventing amounts like 19.90 from being transmitted as 19.89.
+
 ## [2.1.16]
 ### Improvement
 - Added the Electronic Partner platform (pay.electronicpartner.ch) to the platform selection.
