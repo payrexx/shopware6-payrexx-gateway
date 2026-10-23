@@ -263,7 +263,7 @@ class PaymentHandler extends AbstractPaymentHandler
                 'name' => $item->getLabel(),
                 'description' => $item->getDescription(),
                 'quantity' => $item->getQuantity(),
-                'amount' => $unitPrice * 100,
+                'amount' => (int) round($unitPrice * 100),
                 'sku' => isset($item->getPayload()['productNumber']) ? $item->getPayload()['productNumber'] : '',
             ];
         }
@@ -287,7 +287,7 @@ class PaymentHandler extends AbstractPaymentHandler
                 'name' => $shippingMethod->getTranslated()['name'] ?: $shippingMethod->getName(),
                 'description' => $shippingMethod->getTranslated()['description'] ?: $shippingMethod->getDescription(),
                 'quantity' => $quantity,
-                'amount' => $unitPrice * 100,
+                'amount' => (int) round($unitPrice * 100),
                 'sku' => $shippingMethod->getId(),
             ];
         }
@@ -303,7 +303,7 @@ class PaymentHandler extends AbstractPaymentHandler
                 $basket[] = [
                     'name' => 'Tax ' . $tax->getTaxRate() . '%',
                     'quantity' => $quantity,
-                    'amount' => $unitPrice * 100,
+                    'amount' => (int) round($unitPrice * 100),
                 ];
             }
         }
@@ -341,7 +341,7 @@ class PaymentHandler extends AbstractPaymentHandler
             $amount = $product['amount'];
             $basketAmount += $product['quantity'] * $amount;
         }
-        return intval((string) $basketAmount);
+        return $basketAmount;
     }
 
     /**
