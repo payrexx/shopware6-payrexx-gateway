@@ -8,6 +8,7 @@ use Shopware\Core\Framework\Context;
 use PayrexxPaymentGateway\Handler\PaymentHandler;
 use PayrexxPaymentGateway\PayrexxPaymentGatewaySW6;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\AndFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\OrFilter;
 use Shopware\Core\Framework\Plugin\Context\ActivateContext;
 use Shopware\Core\Framework\Plugin\Context\DeactivateContext;
@@ -30,7 +31,6 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_MAESTRO            = 'maestro';
     public const PAYREXX_JCB                = 'jcb';
     public const PAYREXX_AMEX               = 'american_express';
-    public const PAYREXX_WIR                = 'wirpay';
     public const PAYREXX_PAYPAL             = 'paypal';
     public const PAYREXX_BITCOIN            = 'bitcoin';
     public const PAYREXX_AIRPLUS            = 'airplus';
@@ -70,6 +70,11 @@ class PaymentMethodInstaller implements InstallerInterface
     public const PAYREXX_CRYPTO             = 'crypto';
     public const PAYREXX_VERD_CASH          = 'verd-cash';
     public const PAYREXX_NO_PM              = '';
+
+    // Payment methods no longer supported by Payrexx. They cannot be deleted as existing orders reference them.
+    public const REMOVED_PAYMENT_METHODS = [
+        'wirpay',
+    ];
 
     const PAYMENT_METHODS = [
         self::PAYREXX_MASTERPASS => [
@@ -139,16 +144,6 @@ class PaymentMethodInstaller implements InstallerInterface
                 ],
                 'en-GB' => [
                     'name' => 'American Express',
-                ],
-            ],
-        ],
-        self::PAYREXX_WIR => [
-            'translations' => [
-                'de-DE' => [
-                    'name' => 'WIRpay',
-                ],
-                'en-GB' => [
-                    'name' => 'WIRpay',
                 ],
             ],
         ],
@@ -578,6 +573,7 @@ class PaymentMethodInstaller implements InstallerInterface
         foreach ($paymentMethods->getIds() as $paymentMethodId) {
             $this->setPaymentMethodIsActive($context->getContext(), $paymentMethodId, true);
         }
+        $this->deactivateRemovedPaymentMethods($context->getContext());
     }
 
     public function deactivate(DeactivateContext $context): void
@@ -593,6 +589,27 @@ class PaymentMethodInstaller implements InstallerInterface
     public function update(UpdateContext $context): void {
         foreach (self::PAYMENT_METHODS as $payrexxPaymentMethodIdentifier => $payrexxPaymentMethod) {
             $this->upsertPaymentMethod($context->getContext(), $payrexxPaymentMethod, $payrexxPaymentMethodIdentifier);
+        }
+        $this->deactivateRemovedPaymentMethods($context->getContext());
+    }
+
+    private function deactivateRemovedPaymentMethods(Context $context): void
+    {
+        $technicalNames = array_map(
+            fn (string $identifier) => PaymentHandler::PAYMENT_METHOD_PREFIX . $identifier,
+            self::REMOVED_PAYMENT_METHODS
+        );
+        $criteria = (new Criteria())->addFilter(
+            new EqualsFilter('handlerIdentifier', PaymentHandler::class),
+            new OrFilter([
+                new EqualsAnyFilter('technicalName', $technicalNames),
+                new EqualsAnyFilter('customFields.payrexx_payment_method_name', $technicalNames),
+            ])
+        );
+        $paymentMethods = $this->paymentMethodRepository->searchIds($criteria, Context::createDefaultContext());
+
+        foreach ($paymentMethods->getIds() as $paymentMethodId) {
+            $this->setPaymentMethodIsActive($context, $paymentMethodId, false);
         }
     }
 

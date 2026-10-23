@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.17]
+### Improvement
+- Removed the WIRpay payment method, as WIR Bank discontinues the service on 02.12.2026. Existing WIRpay payment methods are deactivated on update; orders previously paid with WIRpay are not affected.
+
 ## [2.1.16]
 ### Improvement
 - Added the Electronic Partner platform (pay.electronicpartner.ch) to the platform selection.
