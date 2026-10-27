@@ -2,7 +2,7 @@
 
 ## [2.1.18]
 ### Fixed
-- Webhook: accept a transaction only if it belongs to the order and gateway it names, and mark the order as paid only when the confirmed amount matches the order total.
+- Webhook: accept a transaction only if it belongs to the order and gateway it names, and mark the order as paid only when the confirmed amount covers the order total.
 
 ## [2.1.17]
 ### Fixed

@@ -178,15 +178,16 @@ class Dispatcher
             return new Response('Validation: Gateway Mismatch', Response::HTTP_BAD_REQUEST);
         }
 
-        // A bank transfer can be paid in parts, so only the sum of all confirmed transactions settles the order
+        // A bank transfer can be paid in parts, so only the sum of all confirmed transactions settles the order.
+        // An overpayment still settles it, otherwise the order would stay open since the webhook is not resent.
         $orderAmount = (int) round($transaction->getAmount()->getTotalPrice() * 100);
         if (
             $payrexxTransaction->getStatus() === PayrexxTransaction::CONFIRMED
-            && $this->getConfirmedAmount($payrexxGateway) !== $orderAmount
+            && $this->getConfirmedAmount($payrexxGateway) < $orderAmount
         ) {
             $this->logger->warning(
                 'Payrexx webhook: confirmed amount of gateway ' . $payrexxGateway->getId()
-                . ' does not match order ' . $swOrderNumber
+                . ' is lower than the total of order ' . $swOrderNumber
             );
             return new Response('Validation: Amount Mismatch', Response::HTTP_OK);
         }
