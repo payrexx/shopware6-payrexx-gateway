@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.1.18]
+### Fixed
+- Webhook: accept a transaction only if it belongs to the order and gateway it names, and mark the order as paid only when the confirmed amount covers the order total.
+
 ## [2.1.17]
 ### Fixed
 - Round basket item, shipping and tax amounts to whole cents, preventing amounts like 19.90 from being transmitted as 19.89.
